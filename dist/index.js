@@ -1,6 +1,6 @@
-import { InstanceBase, InstanceStatus, runEntrypoint, TCPHelper } from '@companion-module/base'
-import { ConfigFields } from './config.js'
-import { getActionDefinitions } from './actions.js'
+import { InstanceBase, InstanceStatus, runEntrypoint, TCPHelper } from '@companion-module/base';
+import { ConfigFields } from '../config.js';
+import { getActionDefinitions } from '../actions.js';
 
 class BluesoundB100Instance extends InstanceBase {
     async init(config) {

@@ -1,7 +1,7 @@
 {
 	"name": "Bluesound B100",
 	"id": "bluesound-b100",
-	"shortname": "b100 module",
+	"shortname": "Bluesound Control Module",
 	"maintainers": [
 		{
 			"name": "Matthew Unkenholz",
