@@ -1,0 +1,25 @@
+{
+	"id": "bluesound-b100",
+	"name": "Bluesound B100 Control Module",
+	"shortname": "b100",
+	"description": "Module to Control Bluesound B100 Network Streamer",
+	"version": "0.0.1",
+	"license": "MIT",
+	"repository": "git+https://github.com/munkaud/bluesound-b100",
+	"maintainers": [
+		{
+			"name": "Matthew Unkenholz",
+			"email": "munkaud+b100@gmail.com"
+		}
+	],
+	"legacyIds": [],
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../index.js"
+	},
+	"manufacturer": "Bluesound Professional",
+	"products": ["TCP and UDP Requests"],
+	"keywords": ["Protocol", "Bluesound", "b100", "API"]
+}
