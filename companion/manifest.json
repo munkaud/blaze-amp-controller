@@ -1,14 +1,26 @@
 {
 	"name": "Bluesound B100",
+	"id": "bluesound-b100",
+	"shortname": "b100 module",
+	"maintainers": [
+		{
+			"name": "Matthew Unkenholz",
+			"email": "munkaud+bc@gmail.com"
+		}
+	],
+	"legacyIds": ["bluesound", "bluesound-pro"],
 	"version": "1.0.0",
 	"description": "Control Bluesound devices via Companion",
-	"author": "Matthew Unkenholz",
 	"license": "MIT",
-	"repository": {
-	  "type": "git",
-	  "url": "https://github.com/munkaud/bluesound-b100"
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../dist/index.js"
 	},
-	"bugs": {
-	  "url": "https://github.com/munkaud/bluesound-b100/issues"
-	}
+	"manufacturer": "Bluesound Professional",
+	"products": ["tcp and udp requests"],
+	"keywords": ["bluesound", "b100", "professional"],
+	"repository": "https://github.com/munkaud/bluesound-b100",
+	"bugs": "https://github.com/munkaud/bluesound-b100/issues"
   }
