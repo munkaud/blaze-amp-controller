@@ -1,11 +1,14 @@
 {
 	"id": "bluesound-b100",
 	"name": "Bluesound B100 Control Module",
-	"shortname": "b100",
-	"description": "Module to Control Bluesound B100 Network Streamer",
-	"version": "0.0.1",
+	"shortname": "b100 module",
+	"description": "Module to Control Bluesound B100 Network Streamer with Streamdeck",
+	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/munkaud/bluesound-b100",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/munkaud/bluesound-b100"
+	},
 	"bugs": {
 		"url": "https://github.com/munkaud/bluesound-b100/issues"
 	},
