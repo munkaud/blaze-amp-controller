@@ -1,32 +1,14 @@
 {
-	"id": "bluesound-b100",
-	"name": "Bluesound B100 Control Module",
-	"shortname": "b100 module",
-	"description": "Module to Control Bluesound B100 Network Streamer with Streamdeck",
-	"version": "0.0.0",
+	"name": "Bluesound B100",
+	"version": "1.0.0",
+	"description": "Control Bluesound devices via Companion",
+	"author": "Matthew Unkenholz",
 	"license": "MIT",
 	"repository": {
-		"type": "git",
-		"url": "https://github.com/munkaud/bluesound-b100"
+	  "type": "git",
+	  "url": "https://github.com/munkaud/bluesound-b100"
 	},
 	"bugs": {
-		"url": "https://github.com/munkaud/bluesound-b100/issues"
-	},
-	"schemaPath": "./schema.json",
-	"maintainers": [
-		{
-			"name": "Matthew Unkenholz",
-			"email": "munkaud+b100@gmail.com"
-		}
-	],
-	"legacyIds": [],
-	"runtime": {
-		"type": "node18",
-		"api": "nodejs-ipc",
-		"apiVersion": "0.0.0",
-		"entrypoint": "../index.js"
-	},
-	"manufacturer": "Bluesound Professional",
-	"products": ["TCP and UDP Requests"],
-	"keywords": ["Protocol", "Bluesound", "b100", "API"]
-}
+	  "url": "https://github.com/munkaud/bluesound-b100/issues"
+	}
+  }
