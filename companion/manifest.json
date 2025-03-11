@@ -6,6 +6,11 @@
 	"version": "0.0.1",
 	"license": "MIT",
 	"repository": "git+https://github.com/munkaud/bluesound-b100",
+	"bugs": {
+		"url": "https://github.com/munkaud/bluesound-b100/issues"
+	},
+	"instancePath": "./index.js",
+	"schemaPath": "./schema.json",
 	"maintainers": [
 		{
 			"name": "Matthew Unkenholz",
