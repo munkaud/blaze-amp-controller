@@ -11,7 +11,7 @@ export const ConfigFields = [
         type: 'number',
         label: 'Port',
         id: 'port',
-        default: 80,
+        default: 11000,
         required: true,
     },
     {
