@@ -1,6 +1,6 @@
 export async function sendCommand(instance, command) {
     try {
-        const url = `http://${instance.config.host}:11000${command}`
+        const url = `http://${instance.config.host}:${instance.config.port}${command}`
         const response = await fetch(url)
         if (!response.ok) {
             instance.log('error', `Failed to send command: ${response.statusText}`)
