@@ -11,3 +11,12 @@ export async function sendCommand(instance, command) {
         instance.log('error', `Network error: ${err.message}`)
     }
 }
+export async function loadUrl(instance, trackURI, seekTime) {
+    if (instance.socket) {
+        instance.log('info', `Sending Load URL command: ${trackURI} at ${seekTime}s`)
+        const command = `/Play?url=${encodeURIComponent(trackURI)}&seek=${seekTime}`
+        instance.socket.send(command)
+    } else {
+        instance.log('error', 'Socket not connected')
+    }
+}

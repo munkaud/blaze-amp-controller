@@ -66,5 +66,51 @@ export function getPresetDefinitions(instance) {
 			],
 			feedbacks: [],
 		},
+		b100_track_seek: {
+			type: 'button',
+			category: 'Playback',
+			name: 'Play Specific Track',
+			style: {
+				text: 'Track & \n Time',
+				size: '14',
+				color: '#FFFFFF',
+				bgcolor: '#000000',
+			},
+			options:[
+				{
+					type: 'textinput',
+					id: 'track_uri',
+					label: 'Track URI',
+					tooltip: 'Enter Track URI',
+					default: '',
+					useVariables: true,
+				},
+				{
+					type: 'number',
+					id: 'seek_time',
+					label: 'Move Playhead to (in seconds)',
+					tooltip: 'Enter a time in seconds of where to begin playback',
+					default: 0,
+					min: 0,
+					step: 1, // <- Added this to ensure proper handling of numeric input
+				}
+			],
+			steps: [
+				{
+					down: [
+						{
+							actionId: 'b100_track_seek',
+							options: {
+								track_uri: '', // <- Pull from button setup
+								seek_time: 0   // <- Pull from button setup
+							},
+						},
+					],
+					up: [],
+				},
+			],
+			feedbacks: [],
+		},
+		
 	}
 }
