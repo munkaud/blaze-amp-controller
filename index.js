@@ -1,74 +1,60 @@
-import { InstanceBase, InstanceStatus, runEntrypoint, TCPHelper } from '@companion-module/base'
-import { ConfigFields } from './config.js'
-import { getActionDefinitions } from './actions.js'
+import { InstanceBase, InstanceStatus, runEntrypoint, TCPHelper } from '@companion-module/base';
+import { ConfigFields } from './config.js';
+import { getActionDefinitions } from './actions.js';
+import { getPresetDefinitions} from './presets.js';
 
 class BluesoundB100Instance extends InstanceBase {
     async init(config) {
-        this.config = config
+        this.config = config;
 
         // Set the action definitions based on what actions we define in actions.js
-        this.setActionDefinitions(getActionDefinitions(this))
+        this.setActionDefinitions(getActionDefinitions(this));
 
-        // Call configUpdated to handle initial connection setup
-        await this.configUpdated(config)
+        // Log action definitions for debugging
+        this.log('info', 'Action definitions have been registered.');
+
+        // Set the preset definitions based on what presets we have available in presets.js
+        this.setPresetDefinitions(getPresetDefinitions(this));
+
+        // Log action definitions for debugging
+        this.log('info', 'Preset definitions have been registered.');
+
+        // Call configUpdated to handle initial connection setup (simplified)
+        await this.configUpdated(config);
     }
 
     async configUpdated(config) {
+        this.config = config;
+
+        // Log when the configUpdated function is called
         this.log('debug', 'Config updated with: ' + JSON.stringify(config));
-    
-        if (this.udp) {
-            this.udp.destroy()
-            delete this.udp
-        }
-    
+
+        // Check if the host is configured
         if (this.socket) {
             this.socket.destroy()
             delete this.socket
         }
-    
-        this.config = config
-        // log when the configUpdated function is called
-        console.log('Config Updated:', this.config)
-        //Check to see if a host is configured
-        if (this.config.host){
-            console.log('Attempting to connect to Bluesound device at: ', this.config.host);
-
-        if (this.config.prot == 'tcp') {
-            this.log('debug', 'Initializing TCP...');
-            this.init_tcp()
-            this.init_tcp_variables()
-        }
-    } else {
-        console.log('No host configured for Bluesound Device.');
-        this.updateStatus(InstanceStatus.BadConfig)
-    }
-        if (this.config.prot == 'udp') {
-            this.log('debug', 'Initializing UDP...');
-            this.init_udp()
-            this.setVariableDefinitions([])
-        }
-    }
-
-    async destroy() {
-        this.log('debug', 'Destroying connection...');
-    
-        if (this.socket) {
-            this.socket.destroy()
-            this.log('debug', 'TCP connection destroyed.');
-        } else if (this.udp) {
-            this.udp.destroy()
-            this.log('debug', 'UDP connection destroyed.');
+        if (this.config.host) {
+            console.log('debug', 'Host configured, attempting to connect at: ' + this.config.host)
+            if (this.config.prot === 'tcp'){
+                this.init_tcp()
+            }
         } else {
-            this.updateStatus(InstanceStatus.Disconnected)
-            this.log('debug', 'No active connection to destroy.');
+            this.updateStatus(InstanceStatus.BadConfig)
+            console.log('error', 'No host configured.')
+            
         }
     }
 
     // Return the configuration fields for web config
     getConfigFields() {
-        return ConfigFields
+        return ConfigFields;
     }
 
+    async destroy() {
+        this.log('debug', 'Destroying connection...');
+        // Add any clean-up code here if needed
+    }
     init_tcp() {
         this.log('debug', 'Initializing TCP connection with host: ' + this.config.host + ', port: ' + this.config.port);
     
@@ -77,6 +63,7 @@ class BluesoundB100Instance extends InstanceBase {
             delete this.socket
         }
     
+        // ✅ Enable this to update the connection status
         this.updateStatus(InstanceStatus.Connecting)
     
         if (this.config.host) {
@@ -84,12 +71,12 @@ class BluesoundB100Instance extends InstanceBase {
             this.socket = new TCPHelper(this.config.host, this.config.port)
     
             this.socket.on('status_change', (status, message) => {
-                this.updateStatus(status, message)
+                this.updateStatus(status, message) // ✅ Make sure this line is active
                 this.log('debug', 'TCP status change: ' + status + ', message: ' + message);
             })
     
             this.socket.on('error', (err) => {
-                this.updateStatus(InstanceStatus.ConnectionFailure, err.message)
+                this.updateStatus(InstanceStatus.ConnectionFailure, err.message) // ✅ Report connection failures
                 this.log('error', 'Network error: ' + err.message);
             })
     
@@ -108,18 +95,11 @@ class BluesoundB100Instance extends InstanceBase {
                 }
             })
         } else {
-            this.updateStatus(InstanceStatus.BadConfig)
+            this.updateStatus(InstanceStatus.BadConfig) // ✅ Mark as bad config if no host
             this.log('error', 'No host specified for TCP connection.');
         }
-    }
-
-    // Initialize variables that we will use in actions or responses
-    init_tcp_variables() {
-        this.setVariableDefinitions([{ name: 'Last TCP Response', variableId: 'tcp_response' }])
-
-        this.setVariableValues({ tcp_response: '' })
     }
 }
 
 // Run the entry point for the module
-runEntrypoint(BluesoundB100Instance, [])
+runEntrypoint(BluesoundB100Instance, []);

@@ -1,8 +1,9 @@
 export const ConfigFields = [
     {
         type: 'textinput',
-        label: 'IP Address',
+        label: 'B100 IP Address',
         id: 'host',
+        width: 6,
         default: '192.168.1.100',
         required: true,
     },

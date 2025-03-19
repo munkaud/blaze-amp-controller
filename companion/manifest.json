@@ -1,7 +1,7 @@
 {
-	"name": "Bluesound B100",
+	"name": "Bluesound B100 Control Module",
 	"id": "bluesound-b100",
-	"shortname": "Bluesound Control Module",
+	"shortname": "Bluesound Controller",
 	"maintainers": [
 		{
 			"name": "Matthew Unkenholz",
@@ -10,13 +10,14 @@
 	],
 	"legacyIds": ["bluesound", "bluesound-pro"],
 	"version": "1.0.0",
-	"description": "Control Bluesound devices via Companion",
+	"description": "Control Bluesound Devices via TCP Commands in Companion",
 	"license": "MIT",
 	"runtime": {
 		"type": "node18",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
-		"entrypoint": "../dist/index.js"
+		"entrypoint": "../index.js",
+		"companion": ">=3.0.0"
 	},
 	"manufacturer": "Bluesound Professional",
 	"products": ["tcp and udp requests"],
