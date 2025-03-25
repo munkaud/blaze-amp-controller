@@ -66,51 +66,51 @@ export function getPresetDefinitions(instance) {
 			],
 			feedbacks: [],
 		},
-		b100_track_seek: {
+		b100_service_search: {
 			type: 'button',
 			category: 'Playback',
-			name: 'Play Specific Track',
+			name: 'Search and Play Track',
 			style: {
-				text: 'Track & \n Time',
+				text: 'Search & \n Play',
 				size: '14',
 				color: '#FFFFFF',
 				bgcolor: '#000000',
 			},
 			options:[
 				{
+					type: 'dropdown',
+					id: 'service',
+					label: 'Music Service',
+					tooltip: 'Select music service',
+					choices: [
+						{ id: 'TIDAL', label: 'Tidal' },
+						{ id: 'SPOTIFY', label: 'Spotify' },
+						// Add more services if available
+					],
+					default: 'TIDAL',
+				},
+				{
 					type: 'textinput',
-					id: 'track_uri',
-					label: 'Track URI',
-					tooltip: 'Enter Track URI',
+					id: 'search_term',
+					label: 'Search Term',
+					tooltip: 'Enter artist, album, or track name',
 					default: '',
 					useVariables: true,
 				},
-				{
-					type: 'number',
-					id: 'seek_time',
-					label: 'Move Playhead to (in seconds)',
-					tooltip: 'Enter a time in seconds of where to begin playback',
-					default: 0,
-					min: 0,
-					step: 1, // <- Added this to ensure proper handling of numeric input
-				}
 			],
 			steps: [
 				{
 					down: [
 						{
-							actionId: 'b100_track_seek',
-							options: {
-								track_uri: '', // <- Pull from button setup
-								seek_time: 0   // <- Pull from button setup
-							},
+							actionId: 'b100_service_search',
+							options: {},
 						},
 					],
 					up: [],
 				},
 			],
 			feedbacks: [],
-		},
+		}
 		
 	}
 }

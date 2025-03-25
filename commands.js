@@ -20,3 +20,26 @@ export async function loadUrl(instance, trackURI, seekTime) {
         instance.log('error', 'Socket not connected')
     }
 }
+export async function getSearchResults(instance) {
+    if (instance.socket) {
+        instance.socket.send('/Browse');
+        instance.socket.on('data', (data) => {
+            const response = data.toString();
+            instance.log('info', `Received search response: ${response}`);
+            // Parse the XML response and store it
+            const searchResults = parseSearchResults(response);
+            instance.searchResults = searchResults;
+        });
+    }
+}
+
+function parseSearchResults(response) {
+    const searchResults = [];
+    // Simple XML parsing example (consider adding a library for complex cases)
+    const regex = /<name>(.*?)<\/name>/g;
+    let match;
+    while ((match = regex.exec(response)) !== null) {
+        searchResults.push(match[1]);
+    }
+    return searchResults;
+}

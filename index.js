@@ -1,7 +1,8 @@
 import { InstanceBase, InstanceStatus, runEntrypoint, TCPHelper } from '@companion-module/base';
 import { ConfigFields } from './config.js';
 import { getActionDefinitions } from './actions.js';
-import { getPresetDefinitions} from './presets.js';
+import { getPresetDefinitions } from './presets.js';
+import { getFeedbackDefinitions } from './feedback.js';
 
 class BluesoundB100Instance extends InstanceBase {
     async init(config) {
@@ -18,6 +19,13 @@ class BluesoundB100Instance extends InstanceBase {
 
         // Log action definitions for debugging
         this.log('info', 'Preset definitions have been registered.');
+
+        //set the feedback definitions based on the defs in feedback.js
+        this.setFeedbackDefinitions(getFeedbackDefinitions(this));
+        this.searchResults = [];
+
+        //log that feedback definitions have been registered.
+        this.log('info', 'Feedback definitions have been registered.');
 
         // Call configUpdated to handle initial connection setup (simplified)
         await this.configUpdated(config);
@@ -45,7 +53,13 @@ class BluesoundB100Instance extends InstanceBase {
             
         }
     }
-
+    setFeedbackOptions(id, options) {
+        if (this.setFeedbackOptions === undefined) {
+            this.feedbackOptions = {}
+        }
+        this.feedbackOptions[id] = options
+        this.checkFeedbacks(id)
+    }
     // Return the configuration fields for web config
     getConfigFields() {
         return ConfigFields;

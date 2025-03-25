@@ -1,4 +1,4 @@
-import {sendCommand, loadUrl} from './commands.js'
+import {sendCommand, loadUrl, getSearchResults, parseSearchResults} from './commands.js'
 
 export function getActionDefinitions(instance) {
     return {
@@ -26,34 +26,36 @@ export function getActionDefinitions(instance) {
                 await sendCommand(instance, '/Back')
             },
         },
-        b100_track_seek: {
-            name: 'Play Specific Track',
-            options: [
-                {
-                    type: 'textinput',
-                    id: 'track_uri',
-                    label: 'Track URI',
-                    tooltip: 'Enter Track URI',
-                    default: '',
-                    useVariables: true,
-                },
-                {
-                    type: 'number',
-                    id: 'seek_time',
-                    label: 'Move Playhead to (in seconds)',
-                    tooltip: 'Enter a time in seconds of where to begin playback',
-                    default: 0,
-                    min: 0,
-                    step: 1, // Added step
-                }
-            ],
-            callback: async (event) => {
-                const trackURI = event.options.track_uri
-                const seekTime = event.options.seek_time
-                instance.log('info', `Loading Track: ${trackURI} at ${seekTime}s`)
-                await loadUrl(instance, trackURI, seekTime)
-            },
-        }
-        
-    }
+        b100_service_search: {
+			options: [
+				{
+					type: 'dropdown',
+					id: 'service',
+					label: 'Music Service',
+					choices: [
+						{ id: 'TIDAL', label: 'Tidal' },
+						{ id: 'SPOTIFY', label: 'Spotify' },
+					],
+					default: 'TIDAL',
+				},
+				{
+					type: 'textinput',
+					id: 'search_term',
+					label: 'Search Term',
+					default: '',
+				},
+			],
+			name: 'Service Search',
+			callback: async (action) => {
+				const service = action.options.service
+				const searchTerm = encodeURIComponent(action.options.search_term)
+
+				instance.log('info', `Searching for "${searchTerm}" on ${service}`)
+
+				const url = `/Browse?service=${service}&search=${searchTerm}`
+
+				await sendCommand(instance, url)
+			},
+		},
+	}
 }
