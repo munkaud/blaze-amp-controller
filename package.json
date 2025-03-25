@@ -12,7 +12,8 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@companion-module/base": "^1.8.0"
+		"@companion-module/base": "^1.8.0",
+		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^1.5.0"

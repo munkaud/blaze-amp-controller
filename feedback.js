@@ -5,30 +5,37 @@ export function getFeedbackDefinitions(instance) {
             name: 'Search Results',
             options: [
                 {
-                    type: 'number',
+                    type: 'dropdown', // or 'number' if it's an index
                     id: 'value',
                     label: 'Select Result',
                     default: 0,
                 }
             ],
+            
             subscribe: () => {
-                if (instance.searchResults) {
-                    instance.setFeedbackOptions('search_results', instance.searchResults.map((result, index) => ({
-                        id: index,
-                        label: result.title // or result.name, depending on how the search data is structured
-                    })))
+                if (instance.searchResults && instance.searchResults.length > 0) {
+                    instance.setFeedbackOptions(
+                        'search_results',
+                        instance.searchResults.map((result, index) => ({
+                            id: index,
+                            label: result.title || result.name // Handle potential missing label
+                        }))
+                    )
                 }
             },
             unsubscribe: () => {
-                instance.setFeedbackOptions('search_results', [])
+                instance.searchResults = [];
+                instance.setFeedbackOptions('search_results', []);
             },
+            
             callback: (feedback) => {
                 if (instance.searchResults?.length > 0) {
-                    const selectedTrack = instance.searchResults?.[feedback.options.value]
-                    return selectedTrack ? { text: selectedTrack } : { text: '' }
+                    const selectedTrack = instance.searchResults[feedback.options.value];
+                    return selectedTrack ? { text: selectedTrack } : { text: '' };
                 }
-                return {text: ''}
+                return { text: '' };
             },
+            
         },
     }
 }

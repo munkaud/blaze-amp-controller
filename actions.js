@@ -1,4 +1,4 @@
-import {sendCommand, loadUrl, getSearchResults, parseSearchResults} from './commands.js'
+import { sendCommand, loadUrl, getSearchResults, parseSearchResults } from './commands.js'
 
 export function getActionDefinitions(instance) {
     return {
@@ -27,35 +27,57 @@ export function getActionDefinitions(instance) {
             },
         },
         b100_service_search: {
-			options: [
-				{
-					type: 'dropdown',
-					id: 'service',
-					label: 'Music Service',
-					choices: [
-						{ id: 'TIDAL', label: 'Tidal' },
-						{ id: 'SPOTIFY', label: 'Spotify' },
-					],
-					default: 'TIDAL',
-				},
-				{
-					type: 'textinput',
-					id: 'search_term',
-					label: 'Search Term',
-					default: '',
-				},
-			],
-			name: 'Service Search',
-			callback: async (action) => {
-				const service = action.options.service
-				const searchTerm = encodeURIComponent(action.options.search_term)
+            options: [
+                {
+                    type: 'dropdown',
+                    id: 'service',
+                    label: 'Music Service',
+                    choices: [
+                        { id: 'TIDAL', label: 'Tidal' },
+                        { id: 'SPOTIFY', label: 'Spotify' },
+                    ],
+                    default: 'TIDAL',
+                },
+                {
+                    type: 'textinput',
+                    id: 'search_term',
+                    label: 'Search Term',
+                    default: '',
+                },
+            ],
+            name: 'Service Search',
+            callback: async (action) => {
+                const service = action.options.service
+                const searchTerm = encodeURIComponent(action.options.search_term)
 
-				instance.log('info', `Searching for "${searchTerm}" on ${service}`)
+                instance.log('info', `Searching for "${searchTerm}" on ${service}`)
 
-				const url = `/Browse?service=${service}&search=${searchTerm}`
+                const url = `/Browse?service=${service}&search=${searchTerm}`
 
-				await sendCommand(instance, url)
-			},
-		},
-	}
+                try {
+                    // Send the command and retrieve results
+                    const response = await getSearchResults(instance, url)
+                    if (response) {
+                        instance.searchResults = parseSearchResults(response)
+
+                        instance.log(
+                            'info',
+                            `Received ${instance.searchResults.length} results`
+                        )
+
+                        // Update feedback dropdown with search results
+                        instance.setFeedbackOptions(
+                            'search_results',
+                            instance.searchResults.map((result, index) => ({
+                                id: index,
+                                label: result.title || result.name, // Adjust to match API response structure
+                            }))
+                        )
+                    }
+                } catch (error) {
+                    instance.log('error', `Search failed: ${error.message}`)
+                }
+            },
+        },
+    }
 }
