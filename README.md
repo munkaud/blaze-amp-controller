@@ -2,7 +2,7 @@
 
 ## bluesound-b100 module works with [BluOS](https://www.bluesoundprofessional.com)
 
-If you are using this plugin - it is 0. version. That means I'm not done building yet, but will be adding stuff that works as I go. This is an experiment in VSCode, Companion and making a custom module, for my own education. You have been warned.
+If you are using this plugin - it is a 0. version. That means I'm not done building yet, but will be adding stuff that is working (usually...) as I go. This is an experiment to get my chops up in VSCode; and to explore the power of Companion by making a custom module, for my own education. You have been warned.
 
 | Version | Notes| 
 | ---------- | -----------------------------------|
