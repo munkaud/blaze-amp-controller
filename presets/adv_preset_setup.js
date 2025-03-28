@@ -1,6 +1,7 @@
 // adv_preset_ui.js
 
-export const initAdvancedPresets = {
+export function initAdvancedPresets(self) {
+   return{
     b100_service_search: {
         options: [
             {
@@ -24,3 +25,4 @@ export const initAdvancedPresets = {
         feedbacks: [],  // To be handled in advanced logic
     },
 };
+}
