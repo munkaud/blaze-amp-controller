@@ -1,6 +1,6 @@
 console.log('index.js is loading...')
 
-    import { InstanceBase, runEntrypoint, TCPHelper} from '@companion-module/base'
+    import { InstanceBase, runEntrypoint } from '@companion-module/base'
     import { initBasicPresets } from './presets/basic_preset_setup.js'
     import { initAdvancedPresets } from './presets/adv_preset_setup.js'
     import { registerBasicActions } from './presets/basic_preset_logic.js'

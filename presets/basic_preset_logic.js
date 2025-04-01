@@ -125,6 +125,48 @@ export function registerBasicActions(self) {
                 await sendCommand(self, command);
             },
         },        
+        b100_setVolume: {
+            name: 'Set Player Volume',
+            description: ' Set Volume to a particular level. Default is 50/100',
+            options: [
+                {
+                    type: 'number',
+                    id: 'level',
+                    label: 'Volume Level',
+                    default: 50, // Default half at 50%
+                    min: 1,
+                    max: 100,
+                    level: 50,
+                    step: 5,
+                },
+            ],
+            callback: async (action) => {
+                const level = action.options?.level; // Ensure a fallback to 3 if undefined
+                self.log('debug', `Sending volume set command: /Volume?level=${level}`);
+                const command = `/Volume?level=${level}`;
+                await sendCommand(self, command);
+            },
+        },        
+        b100_playerMuteOn: {
+            name: 'Mute Player',
+            type: 'basic',
+            description: 'Set Player to Mute On',
+            options: [],
+            callback: async (action) => {
+                const command = `/Volume?mute=1`;
+                await sendCommand(self, command);
+            },
+        },
+        b100_playerMuteOff: {
+            name: 'Un-Mute Player',
+            type: 'basic',
+            description: 'Set Player to Mute Off',
+            options: [],
+            callback: async (action) => {
+                const command = `/Volume?mute=0`;
+                await sendCommand(self, command);
+            },
+        },        
         b100_volume_level: {
             type: 'advanced',
             name: 'Volume Level',

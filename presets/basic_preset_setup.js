@@ -114,6 +114,72 @@ export function initBasicPresets(self) {
             ],
             feedbacks: [],
         },
+        b100_playerMuteOn: {
+            type: 'button',
+            category: 'Playback',
+            name: 'Mute On',
+            style: {
+                text: 'Mute \n On',
+                size: '14',
+                color: '#FFFFFF',
+                bgcolor: '#000000',
+            },
+            steps: [
+                {
+                    down: [
+                        {
+                            actionId: 'b100_playerMuteOn',
+                        },
+                    ],
+                    up: [],
+                },
+            ],
+            feedbacks: [],
+        },
+        b100_playerMuteOff: {
+            type: 'button',
+            category: 'Playback',
+            name: 'Mute Off',
+            style: {
+                text: 'Mute \n Off',
+                size: '14',
+                color: '#FFFFFF',
+                bgcolor: '#000000',
+            },
+            steps: [
+                {
+                    down: [
+                        {
+                            actionId: 'b100_playerMuteOff',
+                        },
+                    ],
+                    up: [],
+                },
+            ],
+            feedbacks: [],
+        },
+        b100_setVolume: {
+            type: 'button',
+            category: 'Playback',
+            name: 'Set Volume',
+            style: {
+                text: 'Set Player Volume',
+                size: '14',
+                color: '#FFFFFF',
+                bgcolor: '#000000',
+            },
+            steps: [
+                {
+                    down: [
+                        {
+                            actionId: 'b100_setVolume',
+                        },
+                    ],
+                    up: [],
+                },
+            ],
+            feedbacks: [],
+        },
     };
 }
 
