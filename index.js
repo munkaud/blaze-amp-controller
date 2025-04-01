@@ -55,6 +55,8 @@ class BluesoundInstance extends InstanceBase {
             })
     
             this.log('debug', `Presets registered`)
+
+            //this.
     
             this.updateStatus('ok')
             this.log('info', 'Module initialized successfully')
