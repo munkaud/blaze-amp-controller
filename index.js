@@ -25,36 +25,35 @@ class BluesoundInstance extends InstanceBase {
         
         this.config = config
         this.updateStatus('connecting')
-        //this.log('debug', `Config set: ${JSON.stringify(this.config)}`)
     
         try {
             this.log('debug', `Calling setupConnection()`)
             await setupConnection(this)
             this.log('debug', `setupConnection() completed`)
     
-            // this.setActionDefinitions(getActionDefinitions(this))
-            // this.setPresetDefinitions(getPresetDefinitions(this))
-            // this.log('debug', `Action and preset definitions set`)
-    
-            registerBasicActions(this)
-            this.log('debug', `Basic actions registered`)
-            registerAdvancedActions(this)
-            this.log('debug', `Advanced actions registered`)
-            initBasicPresets(this)
-            this.log('debug', `Basic presets initialized`)
-            initAdvancedPresets(this)
-            this.log('debug', `Advanced presets initialized`)
-
+            // Register actions and store them properly
             const basicActions = registerBasicActions(this)
             const advancedActions = registerAdvancedActions(this)
-
+    
+            this.setActionDefinitions({
+                ...basicActions,
+                ...advancedActions,
+            })
+    
+            this.log('debug', `Actions registered`)
+    
+            // ✅ Initialize and register presets
             const basicPresets = initBasicPresets(this)
             const advancedPresets = initAdvancedPresets(this)
-
+    
+            this.log('debug', `Basic Presets: ${JSON.stringify(basicPresets)}`)
+            this.log('debug', `Advanced Presets: ${JSON.stringify(advancedPresets)}`)
+    
             this.setPresetDefinitions({
                 ...basicPresets,
-                ...advancedPresets
+                ...advancedPresets,
             })
+    
             this.log('debug', `Presets registered`)
     
             this.updateStatus('ok')
@@ -63,7 +62,7 @@ class BluesoundInstance extends InstanceBase {
             this.updateStatus('error', error.message)
             this.log('error', `Initialization failed: ${error.message}`)
         }
-    }    
+    }  
 }
 
 runEntrypoint(BluesoundInstance)
