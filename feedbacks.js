@@ -1,16 +1,26 @@
 module.exports = (instance) => ({
-	powerOnState: { /* unchanged */ },
-	powerOffState: { /* unchanged */ },
-	inputMuteState: {
+	powerOnState: {
 	  type: 'advanced',
-	  name: 'Input Mute State',
-	  description: 'Show mute status for an input',
-	  options: [
-		{ type: 'number', label: 'Input ID', id: 'inputId', default: 1, min: 1, max: 10 },
-	  ],
-	  callback: ({ options }) => {
-		// Placeholder: Need GET INPUT_MUTE to track state
-		return { bgcolor: '0' }; // TBD with real mute state
+	  name: 'Power On Indicator',
+	  description: 'Show checkmark when amp is on',
+	  options: [],
+	  callback: () => {
+		if (instance.state.power === 'on') {
+		  return { text: 'Power On ✓', bgcolor: 2263842 }; // Forest green
+		}
+		return { text: 'Power On', bgcolor: 0, color: 8421504 }; // Grey
+	  },
+	},
+	powerOffState: {
+	  type: 'advanced',
+	  name: 'Power Off Indicator',
+	  description: 'Show checkmark when amp is off',
+	  options: [],
+	  callback: () => {
+		if (instance.state.power === 'off') {
+		  return { text: 'Power Off ✓', bgcolor: 9109504 }; // Dark red
+		}
+		return { text: 'Power Off', bgcolor: 0, color: 8421504 }; // Grey
 	  },
 	},
   });

@@ -1,144 +1,24 @@
 const { InstanceBase, InstanceStatus, TCPHelper, runEntrypoint } = require('@companion-module/base');
+const actions = require('./actions');
+const feedbacks = require('./feedbacks');
 const powerPresets = require('./presets/power');
 const setupPresets = require('./presets/setup');
 const inputPresets = require('./presets/inputs');
+const digitalPresets = require('./presets/digitals');
 
 class BlazeAudioInstance extends InstanceBase {
   constructor(internal) {
     super(internal);
     this.socket = null;
-    this.state = { power: 'unknown', inputs: 0, zones: 0, outputs: 0, inputNames: {} };
+    this.state = { power: 'unknown', inputs: 0, zones: 0, outputs: 0, inputNames: {}, inputSensitivities: {}, inputGains: {}, generatorGain: null, stereoPairs: {} };
   }
 
   async init(config) {
     this.config = config;
     this.initSocket();
-    this.setActionDefinitions({
-      powerOn: {
-        name: 'Power On',
-        options: [],
-        callback: async () => {
-          if (!this.socket) return this.log('error', 'Socket not connected');
-          try {
-            this.socket.send('POWER_ON\n');
-            this.log('info', 'Power On command sent');
-          } catch (err) {
-            this.log('error', `Failed to send Power On: ${err.message}`);
-          }
-        },
-      },
-      powerOff: {
-        name: 'Power Off',
-        options: [],
-        callback: async () => {
-          if (!this.socket) return this.log('error', 'Socket not connected');
-          try {
-            this.socket.send('POWER_OFF\n');
-            this.log('info', 'Power Off command sent');
-          } catch (err) {
-            this.log('error', `Failed to send Power Off: ${err.message}`);
-          }
-        },
-      },
-      getConfig: {
-        name: 'Get Amp Config',
-        options: [],
-        callback: async () => {
-          if (!this.socket) return this.log('error', 'Socket not connected');
-          try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            this.log('debug', 'Sending: GET IN.COUNT\\n');
-            this.socket.send('GET IN.COUNT\n');
-            this.log('debug', 'Sending: GET ZONE.COUNT\\n');
-            this.socket.send('GET ZONE.COUNT\n');
-            this.log('debug', 'Sending: GET OUT.COUNT\\n');
-            this.socket.send('GET OUT.COUNT\n');
-            this.log('info', 'Requested amp configuration');
-          } catch (err) {
-            this.log('error', `Failed to request config: ${err.message}`);
-          }
-        },
-      },
-      muteInput: {
-        name: 'Mute Input',
-        options: [
-          { type: 'number', label: 'Input ID', id: 'inputId', default: 1, min: 1, max: 10 },
-          { type: 'checkbox', label: 'Mute', id: 'mute', default: true },
-        ],
-        callback: async ({ options }) => {
-          if (!this.socket) return this.log('error', 'Socket not connected');
-          try {
-            const cmd = options.mute ? `MUTE_ON ${options.inputId}\n` : `MUTE_OFF ${options.inputId}\n`;
-            this.socket.send(cmd);
-            this.log('info', `${options.mute ? 'Muted' : 'Unmuted'} input ${options.inputId}`);
-          } catch (err) {
-            this.log('error', `Failed to mute input: ${err.message}`);
-          }
-        },
-      },
-      setInputGain: {
-        name: 'Set Input Gain',
-        options: [
-          { type: 'number', label: 'Input ID', id: 'inputId', default: 1, min: 1, max: 10 },
-          { type: 'number', label: 'Gain (dB)', id: 'gain', default: 0, min: -100, max: 12 },
-        ],
-        callback: async ({ options }) => {
-          if (!this.socket) return this.log('error', 'Socket not connected');
-          try {
-            this.socket.send(`SET INPUT_GAIN ${options.inputId} ${options.gain}\n`);
-            this.log('info', `Set gain for input ${options.inputId} to ${options.gain} dB`);
-          } catch (err) {
-            this.log('error', `Failed to set gain: ${err.message}`);
-          }
-        },
-      },
-  getInputName: { // New action
-    name: 'Get Input Name',
-    options: [
-      { type: 'number', label: 'Input IID', id: 'iid', default: 100, min: 100, max: 400 },
-    ],
-    callback: async ({ options }) => {
-      if (!this.socket) return this.log('error', 'Socket not connected');
-      try {
-        this.log('debug', `Sending: GET IN-${options.iid}.NAME\\n`);
-        this.socket.send(`GET IN-${options.iid}.NAME\n`);
-      } catch (err) {
-        this.log('error', `Failed to get input name: ${err.message}`);
-      }
-    }
-  },
-      powerOffState: {
-        type: 'advanced',
-        name: 'Power Off Indicator',
-        description: 'Show checkmark when amp is off',
-        options: [],
-        callback: () => {
-          if (this.state.power === 'off') {
-            return { text: 'Power Off ✓', bgcolor: 9109504 };
-          }
-          return { text: 'Power Off', bgcolor: 0, color: 8421504 };
-        },
-      },
-      inputMuteState: {
-        type: 'advanced',
-        name: 'Input Mute State',
-        description: 'Show mute status for an input',
-        options: [
-          { type: 'number', label: 'Input ID', id: 'inputId', default: 1, min: 1, max: 10 },
-        ],
-        callback: ({ options }) => {
-          return { bgcolor: 0 }; // Placeholder
-        },
-      },
-    });
-    this.setPresetDefinitions([...powerPresets(this), ...setupPresets(this), ...inputPresets(this)]);
-  }
-
-  // Rest of main.js unchanged: configUpdated, getConfigFields, initSocket, parseResponse, destroy
-
-  async configUpdated(config) {
-    this.config = config;
-    this.initSocket();
+    this.setActionDefinitions(actions(this));
+    this.setFeedbackDefinitions(feedbacks(this));
+    this.updatePresets(); // Initial call
   }
 
   async configUpdated(config) {
@@ -148,7 +28,7 @@ class BlazeAudioInstance extends InstanceBase {
 
   getConfigFields() {
     return [
-      { type: 'textinput', id: 'host', label: 'Amplifier IP Address', width: 6, default: '192.168.12.180' }, // Updated IP
+      { type: 'textinput', id: 'host', label: 'Amplifier IP Address', width: 6, default: '192.168.12.180' },
       { type: 'number', id: 'port', label: 'Port', width: 4, default: 7621, min: 1, max: 65535 },
     ];
   }
@@ -172,14 +52,20 @@ class BlazeAudioInstance extends InstanceBase {
       this.socket.send('GET IN.COUNT\n');
     });
     this.socket.on('data', (data) => {
-      const message = data.toString().trim();
-      this.log('debug', `Received: ${message}`);
-      this.parseResponse(message);
+      const messages = data.toString().trim().split('\n');
+      messages.forEach(message => {
+        this.log('debug', `Received: ${message}`);
+        this.parseResponse(message);
+      });
     });
     this.socket.on('error', (err) => {
       this.updateStatus(InstanceStatus.ConnectionFailure);
       this.log('error', `Socket error: ${err.message}`);
     });
+  }
+
+  updatePresets() {
+    this.setPresetDefinitions([...powerPresets(this), ...setupPresets(this), ...inputPresets(this), ...digitalPresets(this)]);
   }
 
   parseResponse(message) {
@@ -196,6 +82,28 @@ class BlazeAudioInstance extends InstanceBase {
     } else if (message.startsWith('+IN.COUNT')) {
       this.state.inputs = parseInt(message.split(' ')[1], 10);
       this.log('info', `Input count set to ${this.state.inputs}`);
+      const analogIids = [100, 101, 102, 103];
+      const digitalIids = [200, 201, 400];
+      analogIids.forEach(iid => {
+        this.log('debug', `Sending: GET IN-${iid}.NAME\\n`);
+        this.socket.send(`GET IN-${iid}.NAME\n`);
+        this.log('debug', `Sending: GET IN-${iid}.SENS\\n`);
+        this.socket.send(`GET IN-${iid}.SENS\n`);
+        this.log('debug', `Sending: GET IN-${iid}.STEREO\\n`);
+        this.socket.send(`GET IN-${iid}.STEREO\n`);
+        this.log('debug', `Sending: GET IN-${iid}.GAIN\\n`);
+        this.socket.send(`GET IN-${iid}.GAIN\n`);
+      });
+      digitalIids.forEach(iid => {
+        this.log('debug', `Sending: GET IN-${iid}.NAME\\n`);
+        this.socket.send(`GET IN-${iid}.NAME\n`);
+        this.log('debug', `Sending: GET IN-${iid}.GAIN\\n`);
+        this.socket.send(`GET IN-${iid}.GAIN\n`);
+        if (iid === 200 || iid === 201) {
+          this.log('debug', `Sending: GET IN-${iid}.STEREO\\n`);
+          this.socket.send(`GET IN-${iid}.STEREO\n`);
+        }
+      });
     } else if (message.startsWith('+ZONE.COUNT')) {
       this.state.zones = parseInt(message.split(' ')[1], 10);
       this.log('info', `Zone count set to ${this.state.zones}`);
@@ -204,12 +112,31 @@ class BlazeAudioInstance extends InstanceBase {
       this.log('info', `Output count set to ${this.state.outputs}`);
     } else if (message.startsWith('+IN-')) {
       const parts = message.split(' ');
-      const iid = parts[0].split('-')[1].split('.')[0];
-      this.state.inputNames[iid] = parts.slice(1).join(' ');
-      this.log('info', `Input ${iid} name set to ${this.state.inputNames[iid]}`);
+      const key = parts[0].split('.')[0].split('-')[1];
+      if (message.includes('.NAME')) {
+        this.state.inputNames[key] = parts.slice(1).join(' ').replace(/"/g, '');
+        this.log('info', `Input ${key} name set to ${this.state.inputNames[key]}`);
+      } else if (message.includes('.SENS')) {
+        this.state.inputSensitivities[key] = parts[1].replace(/"/g, '');
+        this.log('info', `Input ${key} sensitivity set to ${this.state.inputSensitivities[key]}`);
+      } else if (message.includes('.GAIN')) {
+        const gain = parseFloat(parts[1]);
+        this.state.inputGains[key] = gain;
+        if (key === '400') {
+          this.state.generatorGain = gain;
+          this.log('info', `Generator gain set to ${gain} dB`);
+        } else {
+          this.log('info', `Input ${key} trim set to ${gain} dB`);
+        }
+      } else if (message.includes('.STEREO')) {
+        this.state.stereoPairs[key] = parts[1] === '1';
+        this.log('info', `Input ${key} stereo: ${this.state.stereoPairs[key]}`);
+      }
+      this.updatePresets(); // Refresh on every update
     }
     this.checkFeedbacks();
   }
+
   async destroy() {
     if (this.socket) {
       this.socket.destroy();

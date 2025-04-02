@@ -3,7 +3,7 @@
 	"name": "Blaze Amp Controller",
 	"shortname": "blaze-amps",
 	"description": "API implementation for Blaze Amps",
-	"version": "0.0.3",
+	"version": "0.0.6",
 	"license": "MIT",
 	"repository": "https://github.com/munkaud/blaze-amp-controller",
 	"bugs": "https://github.com/munkaud/blaze-amp-controller/issues",
@@ -21,6 +21,6 @@
 	},
 	"legacyIds": [],
 	"manufacturer": "Blaze Audio",
-	"products": ["122, 252, 504, 3004, 1502"],
+	"products": ["PZC Models: 122, 252, 504, 3004, 1502, 3004, 6008, 4008"],
 	"keywords": []
 }
