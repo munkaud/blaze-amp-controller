@@ -1,27 +1,26 @@
 {
-	"name": "Bluesound B100 Control Module",
-	"id": "bluesound-b100",
-	"shortname": "Bluesound Controller",
+	"id": "blaze-amp-controller",
+	"name": "Blaze Amp Controller",
+	"shortname": "blaze-amps",
+	"description": "API implementation for Blaze Amps",
+	"version": "0.0.1",
+	"license": "MIT",
+	"repository": "https://github.com/munkaud/blaze-amp-controller",
+	"bugs": "https://github.com/munkaud/blaze-amp-controller/issues",
 	"maintainers": [
 		{
 			"name": "Matthew Unkenholz",
-			"email": "munkaud+bc@gmail.com"
+			"email": "munkaud+bf@gmail.com"
 		}
 	],
-	"legacyIds": ["bluesound", "bluesound-pro"],
-	"version": "0.3.1",
-	"description": "Control Bluesound Devices via TCP Commands in Companion",
-	"license": "MIT",
 	"runtime": {
-		"type": "node18",
+		"type": "node22",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
-		"entrypoint": "../index.js",
-		"companion": ">=3.0.0"
+		"entrypoint": "../main.js"
 	},
-	"manufacturer": "Bluesound Professional",
-	"products": ["tcp and udp requests"],
-	"keywords": ["bluesound", "b100", "professional"],
-	"repository": "https://github.com/munkaud/bluesound-b100",
-	"bugs": "https://github.com/munkaud/bluesound-b100/issues"
-  }
+	"legacyIds": [],
+	"manufacturer": "Blaze Audio",
+	"products": ["122, 252, 504, 3004, 1502"],
+	"keywords": []
+}
