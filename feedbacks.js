@@ -1,33 +1,26 @@
-const { combineRgb } = require('@companion-module/base')
-
-module.exports = async function (self) {
-	self.setFeedbackDefinitions({
-		ChannelState: {
-			name: 'Example Feedback',
-			type: 'boolean',
-			label: 'Channel State',
-			defaultStyle: {
-				bgcolor: combineRgb(255, 0, 0),
-				color: combineRgb(0, 0, 0),
-			},
-			options: [
-				{
-					id: 'num',
-					type: 'number',
-					label: 'Test',
-					default: 5,
-					min: 0,
-					max: 10,
-				},
-			],
-			callback: (feedback) => {
-				console.log('Hello world!', feedback.options.num)
-				if (feedback.options.num > 5) {
-					return true
-				} else {
-					return false
-				}
-			},
-		},
-	})
-}
+module.exports = (instance) => ({
+	powerOnState: {
+	  type: 'advanced',
+	  name: 'Power On Indicator',
+	  description: 'Show checkmark when amp is on',
+	  options: [],
+	  callback: () => {
+		if (instance.state.power === 'on') {
+		  return { text: 'Power On ✓', bgcolor: 2263842 }; // Forest green #228B22
+		}
+		return { text: 'Power On', bgcolor: 0, color: 8421504 }; // Greyed out
+	  },
+	},
+	powerOffState: {
+	  type: 'advanced',
+	  name: 'Power Off Indicator',
+	  description: 'Show checkmark when amp is off',
+	  options: [],
+	  callback: () => {
+		if (instance.state.power === 'off') {
+		  return { text: 'Power Off ✓', bgcolor: 9109504 }; // Dark red #8B0000
+		}
+		return { text: 'Power Off', bgcolor: 0, color: 8421504 }; // Greyed out
+	  },
+	},
+  });

@@ -3,7 +3,7 @@
 	"name": "Blaze Amp Controller",
 	"shortname": "blaze-amps",
 	"description": "API implementation for Blaze Amps",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"license": "MIT",
 	"repository": "https://github.com/munkaud/blaze-amp-controller",
 	"bugs": "https://github.com/munkaud/blaze-amp-controller/issues",
