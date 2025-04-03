@@ -45,46 +45,61 @@ module.exports = (instance) => ({
 	  },
 	},
 	setInputGain: {
-		name: 'Set Input Trim (Gain)',
-		options: [
-		  { type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 400 },
-		  { type: 'number', label: 'Trim (dB)', id: 'gain', default: 0, min: -15, max: 15 },
-		],
-		callback: async ({ options }) => {
-		  if (!instance.socket) return instance.log('error', 'Socket not connected');
-		  try {
-			instance.socket.send(`SET INPUT_GAIN ${options.inputId} ${options.gain}\n`);
-			instance.state.inputGains[options.inputId] = options.gain;
-			instance.log('info', `Set trim for input ${options.inputId} to ${options.gain} dB`);
-		  } catch (err) {
-			instance.log('error', `Failed to set trim: ${err.message}`);
-		  }
+	  name: 'Set Input Trim (Gain)',
+	  options: [
+		{ type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 400 },
+		{ 
+		  type: 'number', 
+		  label: 'Trim (dB)', 
+		  id: 'gain', 
+		  default: 0, 
+		  min: -15, 
+		  max: 15, 
+		  range: true, 
+		  step: 1 
 		},
+	  ],
+	  callback: async ({ options }) => {
+		if (!instance.socket) return instance.log('error', 'Socket not connected');
+		try {
+		  instance.socket.send(`SET IN-${options.inputId}.GAIN ${options.gain}\n`);
+		  instance.state.inputGains[options.inputId] = options.gain;
+		  instance.log('info', `Set trim for input ${options.inputId} to ${options.gain} dB`);
+		  instance.socket.send(`GET IN-${options.inputId}.GAIN\n`);
+		} catch (err) {
+		  instance.log('error', `Failed to set trim: ${err.message}`);
+		}
 	  },
-	  setInputSensitivity: {
-		name: 'Set Input Sensitivity',
-		options: [
-		  { type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 103 },
-		  { type: 'dropdown', label: 'Sensitivity', id: 'sensitivity', default: '14DBU',
-			choices: [
-			  { id: '14DBU', label: '+14 dBu' },
-			  { id: '4DBU', label: '+4 dBu' },
-			  { id: '-10DBV', label: '-10 dBV' },
-			  { id: 'MIC', label: 'Mic' },
-			],
-		  },
-		],
-		callback: async ({ options }) => {
-		  if (!instance.socket) return instance.log('error', 'Socket not connected');
-		  try {
-			instance.socket.send(`SET IN-${options.inputId}.SENS ${options.sensitivity}\n`);
-			instance.state.inputSensitivities[options.inputId] = options.sensitivity;
-			instance.log('info', `Set sensitivity for input ${options.inputId} to ${options.sensitivity}`);
-		  } catch (err) {
-			instance.log('error', `Failed to set sensitivity: ${err.message}`);
-		  }
+	},
+	setInputSensitivity: {
+	  name: 'Set Input Sensitivity',
+	  options: [
+		{ type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 103 },
+		{ 
+		  type: 'dropdown', 
+		  label: 'Sensitivity', 
+		  id: 'sensitivity', 
+		  default: '14DBU',
+		  choices: [
+			{ id: '14DBU', label: '+14 dBu' },
+			{ id: '4DBU', label: '+4 dBu' },
+			{ id: '-10DBV', label: '-10 dBV' },
+			{ id: 'MIC', label: 'Mic' },
+		  ],
 		},
+	  ],
+	  callback: async ({ options }) => {
+		if (!instance.socket) return instance.log('error', 'Socket not connected');
+		try {
+		  instance.socket.send(`SET IN-${options.inputId}.SENS ${options.sensitivity}\n`);
+		  instance.state.inputSensitivities[options.inputId] = options.sensitivity;
+		  instance.log('info', `Set sensitivity for input ${options.inputId} to ${options.sensitivity}`);
+		  instance.socket.send(`GET IN-${options.inputId}.SENS\n`);
+		} catch (err) {
+		  instance.log('error', `Failed to set sensitivity: ${err.message}`);
+		}
 	  },
+	},
 	getInputName: {
 	  name: 'Get Input Name',
 	  options: [
@@ -103,7 +118,7 @@ module.exports = (instance) => ({
 	getInputSensitivity: {
 	  name: 'Get Input Sensitivity',
 	  options: [
-		{ type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 400 },
+		{ type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 103 },
 	  ],
 	  callback: async ({ options }) => {
 		if (!instance.socket) return instance.log('error', 'Socket not connected');
@@ -115,50 +130,45 @@ module.exports = (instance) => ({
 		}
 	  },
 	},
-	getInputSensitivity: {
-		name: 'Get Input Sensitivity',
-		options: [
-		  { type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 103 },
-		],
-		callback: async ({ options }) => {
-		  if (!instance.socket) return instance.log('error', 'Socket not connected');
-		  try {
-			instance.log('debug', `Sending: GET IN-${options.inputId}.SENS\\n`);
-			instance.socket.send(`GET IN-${options.inputId}.SENS\n`);
-		  } catch (err) {
-			instance.log('error', `Failed to get sensitivity: ${err.message}`);
-		  }
+	setGeneratorGain: {
+	  name: 'Set Generator Gain',
+	  options: [
+		{ 
+		  type: 'number', 
+		  label: 'Gain (dB)', 
+		  id: 'gain', 
+		  default: 0, 
+		  min: -48, 
+		  max: 0, 
+		  range: true, 
+		  step: 1 
 		},
+	  ],
+	  callback: async ({ options }) => {
+		if (!instance.socket) return instance.log('error', 'Socket not connected');
+		try {
+		  instance.socket.send(`SET IN-400.GAIN ${options.gain}\n`);
+		  instance.state.generatorGain = options.gain;
+		  instance.log('info', `Set generator gain to ${options.gain} dB`);
+		  instance.socket.send(`GET IN-400.GAIN\n`);
+		} catch (err) {
+		  instance.log('error', `Failed to set generator gain: ${err.message}`);
+		}
 	  },
-	  setGeneratorGain: {
-		name: 'Set Generator Gain',
-		options: [
-		  { type: 'number', label: 'Gain (dB)', id: 'gain', default: 0, min: -48, max: 0 },
-		],
-		callback: async ({ options }) => {
-		  if (!instance.socket) return instance.log('error', 'Socket not connected');
-		  try {
-			instance.socket.send(`SET IN-400.GAIN ${options.gain}\n`);
-			instance.state.generatorGain = options.gain;
-			instance.log('info', `Set generator gain to ${options.gain} dB`);
-		  } catch (err) {
-			instance.log('error', `Failed to set generator gain: ${err.message}`);
-		  }
-		},
+	},
+	getInputTrim: {
+	  name: 'Get Input Trim',
+	  options: [
+		{ type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 400 },
+	  ],
+	  callback: async ({ options }) => {
+		if (!instance.socket) return instance.log('error', 'Socket not connected');
+		try {
+		  instance.log('debug', `Sending: GET IN-${options.inputId}.GAIN\\n`);
+		  instance.socket.send(`GET IN-${options.inputId}.GAIN\n`);
+		} catch (err) {
+		  instance.log('error', `Failed to get trim: ${err.message}`);
+		}
 	  },
-	  getInputTrim: {
-		name: 'Get Input Trim',
-		options: [
-		  { type: 'number', label: 'Input IID', id: 'inputId', default: 100, min: 100, max: 400 },
-		],
-		callback: async ({ options }) => {
-		  if (!instance.socket) return instance.log('error', 'Socket not connected');
-		  try {
-			instance.log('debug', `Sending: GET IN-${options.inputId}.GAIN\\n`);
-			instance.socket.send(`GET IN-${options.inputId}.GAIN\n`);
-		  } catch (err) {
-			instance.log('error', `Failed to get trim: ${err.message}`);
-		  }
-		},
-	  },
-	});
+	},
+  });

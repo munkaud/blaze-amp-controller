@@ -18,7 +18,7 @@ class BlazeAudioInstance extends InstanceBase {
     this.initSocket();
     this.setActionDefinitions(actions(this));
     this.setFeedbackDefinitions(feedbacks(this));
-    this.updatePresets(); // Initial call
+    this.updatePresets();
   }
 
   async configUpdated(config) {
@@ -82,26 +82,30 @@ class BlazeAudioInstance extends InstanceBase {
     } else if (message.startsWith('+IN.COUNT')) {
       this.state.inputs = parseInt(message.split(' ')[1], 10);
       this.log('info', `Input count set to ${this.state.inputs}`);
-      const analogIids = [100, 101, 102, 103];
-      const digitalIids = [200, 201, 400];
-      analogIids.forEach(iid => {
-        this.log('debug', `Sending: GET IN-${iid}.NAME\\n`);
-        this.socket.send(`GET IN-${iid}.NAME\n`);
-        this.log('debug', `Sending: GET IN-${iid}.SENS\\n`);
-        this.socket.send(`GET IN-${iid}.SENS\n`);
-        this.log('debug', `Sending: GET IN-${iid}.STEREO\\n`);
-        this.socket.send(`GET IN-${iid}.STEREO\n`);
-        this.log('debug', `Sending: GET IN-${iid}.GAIN\\n`);
-        this.socket.send(`GET IN-${iid}.GAIN\n`);
-      });
-      digitalIids.forEach(iid => {
+      const primaryIids = [100, 102, 200, 400];
+      primaryIids.forEach(iid => {
         this.log('debug', `Sending: GET IN-${iid}.NAME\\n`);
         this.socket.send(`GET IN-${iid}.NAME\n`);
         this.log('debug', `Sending: GET IN-${iid}.GAIN\\n`);
         this.socket.send(`GET IN-${iid}.GAIN\n`);
-        if (iid === 200 || iid === 201) {
+        if (iid !== 400) {
           this.log('debug', `Sending: GET IN-${iid}.STEREO\\n`);
           this.socket.send(`GET IN-${iid}.STEREO\n`);
+        }
+        if (iid === 100 || iid === 102) {
+          this.log('debug', `Sending: GET IN-${iid}.SENS\\n`);
+          this.socket.send(`GET IN-${iid}.SENS\n`);
+        }
+      });
+      const secondaryIids = [101, 103, 201];
+      secondaryIids.forEach(iid => {
+        this.log('debug', `Sending: GET IN-${iid}.NAME\\n`);
+        this.socket.send(`GET IN-${iid}.NAME\n`);
+        if (iid === 101 || iid === 103) {
+          this.log('debug', `Sending: GET IN-${iid}.SENS\\n`);
+          this.socket.send(`GET IN-${iid}.SENS\n`);
+          this.log('debug', `Sending: GET IN-${iid}.GAIN\\n`); // Add 103 gain polling
+          this.socket.send(`GET IN-${iid}.GAIN\n`);
         }
       });
     } else if (message.startsWith('+ZONE.COUNT')) {
@@ -132,7 +136,7 @@ class BlazeAudioInstance extends InstanceBase {
         this.state.stereoPairs[key] = parts[1] === '1';
         this.log('info', `Input ${key} stereo: ${this.state.stereoPairs[key]}`);
       }
-      this.updatePresets(); // Refresh on every update
+      this.updatePresets();
     }
     this.checkFeedbacks();
   }

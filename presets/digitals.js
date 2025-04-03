@@ -8,13 +8,8 @@ module.exports = (instance) => {
       presets.push({
         type: 'button',
         category: 'Digital Inputs',
-        name: `Trim ${spdif1Name} (Stereo)`,
-        style: { 
-          text: `${spdif1Name} Trim (Stereo)`, 
-          size: '14', 
-          color: '16777215', 
-          bgcolor: '0' 
-        },
+        name: `Trim ${spdif1Name}`,
+        style: { text: `${spdif1Name} Trim`, size: '14', color: '16777215', bgcolor: '0' },
         steps: [
           {
             down: [
@@ -24,6 +19,9 @@ module.exports = (instance) => {
             up: [],
           },
         ],
+        feedback: [
+          { feedbackId: 'inputTrim', options: { inputId: 200 } },
+        ],
       });
     } else {
       [200, 201].forEach(iid => {
@@ -32,12 +30,7 @@ module.exports = (instance) => {
           type: 'button',
           category: 'Digital Inputs',
           name: `Trim ${name}`,
-          style: { 
-            text: `${name} Trim`, 
-            size: '14', 
-            color: '16777215', 
-            bgcolor: '0' 
-          },
+          style: { text: `${name} Trim`, size: '14', color: '16777215', bgcolor: '0' },
           steps: [
             {
               down: [
@@ -46,6 +39,9 @@ module.exports = (instance) => {
               ],
               up: [],
             },
+          ],
+          feedback: [
+            { feedbackId: 'inputTrim', options: { inputId: iid } },
           ],
         });
       });
@@ -56,20 +52,18 @@ module.exports = (instance) => {
       type: 'button',
       category: 'Digital Inputs',
       name: `Generator Gain ${generatorName}`,
-      style: { 
-        text: `${generatorName} Gain: ${instance.state.generatorGain !== null ? instance.state.generatorGain : 'Unknown'}`, 
-        size: '14', 
-        color: '16777215', 
-        bgcolor: '0' 
-      },
+      style: { text: `${generatorName} Gain`, size: '14', color: '16777215', bgcolor: '0' },
       steps: [
         {
           down: [
             { actionId: 'setGeneratorGain', options: { gain: instance.state.generatorGain || 0 } },
-            { actionId: 'getGeneratorGain', options: {} },
+            { actionId: 'getInputTrim', options: { inputId: 400 } }, // Fixed typo from getGeneratorGain
           ],
           up: [],
         },
+      ],
+      feedback: [
+        { feedbackId: 'generatorGain', options: {} },
       ],
     });
     return presets;
