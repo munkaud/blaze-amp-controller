@@ -1,49 +1,48 @@
-module.exports = (instance) => ({
-	powerOn: {
-	  name: 'Power On',
-	  options: [],
-	  callback: async () => {
-		if (!instance.socket) return instance.log('error', 'Socket not connected');
-		try {
-		  instance.socket.send('POWER_ON\n');
-		  instance.log('info', 'Power On command sent');
-		} catch (err) {
-		  instance.log('error', `Failed to send Power On: ${err.message}`);
-		}
-	  },
-	},
-	powerOff: {
-	  name: 'Power Off',
-	  options: [],
-	  callback: async () => {
-		if (!instance.socket) return instance.log('error', 'Socket not connected');
-		try {
-		  instance.socket.send('POWER_OFF\n');
-		  instance.log('info', 'Power Off command sent');
-		} catch (err) {
-		  instance.log('error', `Failed to send Power Off: ${err.message}`);
-		}
-	  },
-	},
-	getConfig: {
-	  name: 'Get Amp Config',
-	  options: [],
-	  callback: async () => {
-		if (!instance.socket) return instance.log('error', 'Socket not connected');
-		try {
-		  await new Promise(resolve => setTimeout(resolve, 1000));
-		  instance.log('debug', 'Sending: GET IN.COUNT\\n');
-		  instance.socket.send('GET IN.COUNT\n');
-		  instance.log('debug', 'Sending: GET ZONE.COUNT\\n');
-		  instance.socket.send('GET ZONE.COUNT\n');
-		  instance.log('debug', 'Sending: GET OUT.COUNT\\n');
-		  instance.socket.send('GET OUT.COUNT\n');
-		  instance.log('info', 'Requested amp configuration');
-		} catch (err) {
-		  instance.log('error', `Failed to request config: ${err.message}`);
-		}
-	  },
-	},
+const poller = require('./lib/poller');
+
+module.exports = function (instance){
+	return {
+		setPower: {
+			name: 'Set Power',
+			options: [
+			  { type: 'dropdown', label: 'Power State', id: 'state', default: 'ON', choices: [{ id: 'ON', label: 'On' }, { id: 'OFF', label: 'Off' }] },
+			],
+			callback: async ({ options }) => {
+			  if (!instance.socket) return instance.log('error', 'Socket not connected');
+			  try {
+				const command = options.state === 'ON' ? 'POWER_ON\n' : 'POWER_OFF\n';
+				if (instance.state.power !== options.state) {
+				  instance.socket.send(command);
+				  instance.log('info', `Power ${options.state} command sent`);
+				  await new Promise(resolve => setTimeout(resolve, 100)); // Wait 1msec
+				} else {
+				  instance.log('debug', `Power already ${options.state}, skipping command`);
+				}
+				instance.socket.send('GET SYSTEM.STATUS.STATE\n');
+				instance.updatePresets();
+			  } catch (err) {
+				instance.log('error', `Failed to set power: ${err.message}`);
+			  }
+			},
+		  },
+		  getPower: {
+			name: 'Get Power',
+			options: [],
+			callback: () => {
+			  if (!instance.socket) return instance.log('error', 'Socket not connected');
+			  instance.log('debug', 'Polling power state');
+			  instance.socket.send('GET SYSTEM.STATUS.STATE\n'); // Update here
+			  instance.updatePresets();
+			},
+		  },
+		  getConfig: {
+			label: 'Get Config',
+			callback: () => {
+			  instance.log('info', 'Manual config poll triggered');
+			  poller.pollConfig(instance);
+			  instance.updatePresets();
+			},
+		  },
 	setInputGain: {
 	  name: 'Set Input Trim (Gain)',
 	  options: [
@@ -171,4 +170,5 @@ module.exports = (instance) => ({
 		}
 	  },
 	},
-  });
+  }
+}

@@ -1,4 +1,5 @@
 const { InstanceBase, runEntrypoint } = require('@companion-module/base');
+const EventEmitter = require('events'); // Node.js built-in
 const socket = require('./lib/socket');
 const poller = require('./lib/poller');
 const parseResponse = require('./lib/parser');
@@ -14,6 +15,8 @@ const outputPresets = require('./presets/outputs');
 class BlazeAudioInstance extends InstanceBase {
   constructor(internal) {
     super(internal);
+    Object.assign(this, EventEmitter.prototype); // Add EventEmitter methods
+    EventEmitter.call(this); // Initialize it
     this.socket = null;
     this.state = { 
       power: 'unknown', 
@@ -47,7 +50,7 @@ class BlazeAudioInstance extends InstanceBase {
   async configUpdated(config) {
     this.config = config;
     socket.initSocket(this);
-    poller.pollConfig(this); // Refresh config on update
+    poller.pollConfig(this);
   }
 
   getConfigFields() {
