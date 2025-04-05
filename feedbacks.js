@@ -78,4 +78,20 @@ module.exports = (instance) => ({
 		  return { text: `${name} Gain: ${gain}` };
 		},
 	  },
+	  zoneSzoneStatus: {
+		type: 'advanced',
+		name: 'Zone Status Display',
+		description: 'Updates button text with zone status',
+		options: [
+		  { type: 'number', label: 'Zone ID', id: 'zoneId', default: 1, min: 1, max: 4 },
+		],
+		callback: ({ options }) => {
+		  const zoneName = instance.state.zoneNames?.[options.zoneId] || `Zone ${options.zoneId}`;
+		  const isStereo = instance.state.zoneLinks[options.zoneId] === true;
+		  const inputId = instance.state.zoneInputs[options.zoneId];
+		  const inputName = instance.state.inputNames[inputId] || (inputId ? `Input ${inputId}` : 'None');
+		  const gain = instance.state.zoneGains?.[options.zoneId] ?? 'Unknown';
+		  return { text: `${zoneName}: ${isStereo ? 'Stereo' : 'Mono'} - ${inputName} - ${gain}dB` };
+		},
+	  },
 	});

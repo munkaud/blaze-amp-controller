@@ -5,6 +5,8 @@ const powerPresets = require('./presets/power');
 const setupPresets = require('./presets/setup');
 const inputPresets = require('./presets/inputs');
 const digitalPresets = require('./presets/digitals');
+const zones = require('./presets/zones');
+const outputs = require('./presets/outputs');
 
 class BlazeAudioInstance extends InstanceBase {
   constructor(internal) {
