@@ -1,26 +1,28 @@
 module.exports = (instance) => [
   {
     type: 'button',
-    category: 'Power Control',
+    category: 'Power',
     name: 'Power On',
-    style: { text: 'Power On', size: '18', color: '16777215' }, // White text, no bgcolor
-    steps: [{ down: [{ actionId: 'setPower', options: { state: 'ON' } }], up: [] }],
-    feedbacks: [{ feedbackId: 'powerOnState' }],
+    style: { text: 'Power On', size: '14', color: '16777215' },
+    steps: [{ down: [{ actionId: 'powerOn', options: {} }], up: [] }],
+    feedbacks: [
+      {
+        feedbackId: 'powerOnState',
+        options: {},
+      },
+    ],
   },
   {
     type: 'button',
-    category: 'Power Control',
+    category: 'Power',
     name: 'Power Off',
-    style: { text: 'Power Off', size: '18', color: '16777215' }, // White text, no bgcolor
-    steps: [{ down: [{ actionId: 'setPower', options: { state: 'OFF' } }], up: [] }],
-    feedbacks: [{ feedbackId: 'powerOffState' }],
-  },
-  {
-    type: 'button',
-    category: 'Power Control',
-    name: 'Get Power State',
-    style: { text: 'Get Power', size: '14', color: '16777215' },
-    steps: [{ down: [{ actionId: 'getPower', options: {} }], up: [] }],
-    feedbacks: [],
+    style: { text: 'Power Off', size: '14', color: '16777215' },
+    steps: [{ down: [{ actionId: 'powerOff', options: {} }], up: [] }],
+    feedbacks: [
+      {
+        feedbackId: 'powerOffState',
+        options: {},
+      },
+    ],
   },
 ];

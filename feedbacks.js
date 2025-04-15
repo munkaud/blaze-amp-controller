@@ -1,5 +1,5 @@
 module.exports = function (instance) {
-	instance.log('info', 'Registering feedback definitions');
+	//instance.log('info', 'Registering feedback definitions');
 	try {
 	  return {
 		powerOnState: {
@@ -8,10 +8,11 @@ module.exports = function (instance) {
 		  description: 'Show checkmark and color when amp is on',
 		  options: [],
 		  callback: () => {
+			//instance.log('debug', `powerOnState feedback: power=${instance.state.power}`);
 			if (instance.state.power === 'ON') {
-			  return { text: 'Power On ✓', bgcolor: '#228B22' }; // Forest green
+			  return { text: 'Power On ✓', bgcolor: 2263842 }; // Forest green
 			}
-			return { text: 'Power On', bgcolor: '#000000', color: '#808080' }; // Black + grey
+			return { text: 'Power On', bgcolor: 0, color: 8421504 }; // Black + grey
 		  },
 		},
 		powerOffState: {
@@ -20,10 +21,11 @@ module.exports = function (instance) {
 		  description: 'Show checkmark and color when amp is off',
 		  options: [],
 		  callback: () => {
+			//instance.log('debug', `powerOffState feedback: power=${instance.state.power}`);
 			if (instance.state.power === 'OFF') {
-			  return { text: 'Power Off ✓', bgcolor: '#8B0000' }; // Deep red
+			  return { text: 'Power Off ✓', bgcolor: 9109504 }; // Deep red
 			}
-			return { text: 'Power Off', bgcolor: '#000000', color: '#808080' }; // Black + grey
+			return { text: 'Power Off', bgcolor: 0, color: 8421504 }; // Black + grey
 		  },
 		},
 		inputSensitivity: {
@@ -81,20 +83,25 @@ module.exports = function (instance) {
 			return { text: `${name} Gain: ${gain}` };
 		  },
 		},
-		zoneSzoneStatus: {
+		zoneStereoStatus: {
 		  type: 'advanced',
-		  name: 'Zone Status Display',
-		  description: 'Updates button text with zone status',
+		  name: 'Zone Stereo Status',
+		  description: 'Change button style based on zone stereo state',
 		  options: [
 			{ type: 'number', label: 'Zone ID', id: 'zoneId', default: 1, min: 1, max: 4 },
 		  ],
 		  callback: ({ options }) => {
-			const zoneName = instance.state.zoneNames?.[options.zoneId] || `Zone ${options.zoneId}`;
-			const isStereo = instance.state.zoneLinks[options.zoneId] === true;
-			const inputId = instance.state.zoneInputs[options.zoneId];
-			const inputName = instance.state.inputNames[inputId] || (inputId ? `Input ${inputId}` : 'None');
-			const gain = instance.state.zoneGains?.[options.zoneId] ?? 'Unknown';
-			return { text: `${zoneName}: ${isStereo ? 'Stereo' : 'Mono'} - ${inputName} - ${gain}dB` };
+			const zid = options.zoneId;
+			//instance.log('debug', `Evaluating zoneStereoStatus for Zone ${zid}, options: ${JSON.stringify(options)}`);
+			const isPrimary = zid === 1 || zid === 3;
+			const isStereo = isPrimary && instance.state.zoneLinks[zid] === 1;
+			const zoneName = instance.state.zoneNames[zid] || `Zone ${zid}`;
+			const displayName = `${zoneName} ${isStereo ? '(ST)' : '(MONO)'}`;
+			//instance.log('debug', `zoneStereoStatus feedback for Zone ${zid}: isPrimary=${isPrimary}, zoneLinks[${zid}]=${instance.state.zoneLinks[zid]}, isStereo=${isStereo}`);
+			if (isStereo) {
+			  return { text: `${displayName} Stereo ✓`, bgcolor: 65280 }; // Green
+			}
+			return { text: `${displayName} Stereo`, bgcolor: 0 }; // Black
 		  },
 		},
 	  };

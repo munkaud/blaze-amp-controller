@@ -1,6 +1,6 @@
 {
 	"name": "blaze-amp-controller",
-	"version": "0.1.0",
+	"version": "0.0.7",
 	"main": "main.js",
 	"scripts": {
 		"format": "prettier -w .",

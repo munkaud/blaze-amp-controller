@@ -1,90 +1,200 @@
 module.exports = (instance) => {
-  const presets = [];
-  const primaryIids = [100, 102]; // Ready for 104, 106 later
-  const secondaryIids = [101, 103];
-  const inputOneName = instance.state.inputNames?.[100] || `Input ${100}`;
-  const inputTwoName = instance.state.inputNames?.[102] || `Input ${102}`;
-  const is100Stereo = instance.state.stereoPairs[100] === true;
-  const is102Stereo = instance.state.stereoPairs[102] === true;
+  const inputs = [
+    { iid: 100, label: 'Input 100' },
+    { iid: 101, label: 'Input 101' },
+    { iid: 102, label: 'Input 102' },
+    { iid: 103, label: 'Input 103' },
+    { iid: 200, label: 'Input 200' },
+    { iid: 201, label: 'Input 201' },
+    { iid: 400, label: 'Generator (400)' },
+  ];
 
-  primaryIids.forEach(iid => {
-    const name = iid === 100 ? inputOneName : inputTwoName;
-    const isStereo = iid === 100 ? is100Stereo : is102Stereo;
-    const isSecondary = iid === 100 ? 101 : 103;
+  const presets = [];
+
+  // Get Input Count
+  presets.push({
+    type: 'button',
+    category: 'Inputs',
+    name: 'Get Input Count',
+    style: { text: 'Get Input Count', size: '14', color: '16777215' },
+    steps: [{ down: [{ actionId: 'getInputCount', options: {} }], up: [] }],
+    feedbacks: [],
+  });
+
+  // Get Input EQ Count
+  presets.push({
+    type: 'button',
+    category: 'Input EQ',
+    name: 'Get Input EQ Count',
+    style: { text: 'Get Input EQ Count', size: '14', color: '16777215' },
+    steps: [{ down: [{ actionId: 'getInputEqCount', options: {} }], up: [] }],
+    feedbacks: [],
+  });
+
+  // Input-specific actions
+  inputs.forEach(input => {
+    const { iid, label } = input;
+
+    // Get/Set Name
     presets.push({
       type: 'button',
-      category: 'Analog Inputs',
-      name: `Sens ${name}`,
-      style: { text: `${name} Sens`, size: '14', color: '16777215', bgcolor: '0' },
-      steps: [
+      category: 'Inputs',
+      name: `Get ${label} Name`,
+      style: { text: `Get ${label} Name`, size: '14', color: '16777215' },
+      steps: [{ down: [{ actionId: 'getInputName', options: { inputId: iid } }], up: [] }],
+      feedbacks: [
         {
-          down: [
-            { actionId: 'setInputSensitivity', options: { inputId: iid, sensitivity: instance.state.inputSensitivities[iid] || '4DBU' } },
-            { actionId: 'getInputSensitivity', options: { inputId: iid } },
-          ],
-          up: [],
+          feedbackId: 'inputTrim', // Reuse existing feedback to show name and gain
+          options: { inputId: iid },
         },
-      ],
-      feedback: [
-        { feedbackId: 'inputSensitivity', options: { inputId: iid } },
       ],
     });
     presets.push({
       type: 'button',
-      category: 'Analog Inputs',
-      name: `Trim ${name}`,
-      style: { text: `${name} Trim`, size: '14', color: '16777215', bgcolor: '0' },
-      steps: [
-        {
-          down: [
-            { actionId: 'setInputGain', options: { inputId: iid, gain: instance.state.inputGains[iid] || 0 } },
-            { actionId: 'getInputTrim', options: { inputId: iid } },
-          ],
-          up: [],
-        },
-      ],
-      feedback: [
-        { feedbackId: 'inputTrim', options: { inputId: iid } },
-      ],
+      category: 'Inputs',
+      name: `Set ${label} Name`,
+      style: { text: `Set ${label} Name`, size: '14', color: '16777215' },
+      steps: [{ down: [{ actionId: 'setInputName', options: { inputId: iid, value: '' } }], up: [] }],
+      feedbacks: [],
     });
-    if (!isStereo) {
+
+    // Get/Set Sensitivity (only for IIDs 100-103)
+    if (iid >= 100 && iid <= 103) {
       presets.push({
         type: 'button',
-        category: 'Analog Inputs',
-        name: `Sens ${iid === 100 ? 'Analog 2' : 'Analog 4'}`,
-        style: { text: `${iid === 100 ? 'Analog 2' : 'Analog 4'} Sens`, size: '14', color: '16777215', bgcolor: '0' },
-        steps: [
+        category: 'Inputs',
+        name: `Get ${label} Sens`,
+        style: { text: `Get ${label} Sens`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'getInputSensitivity', options: { inputId: iid } }], up: [] }],
+        feedbacks: [
           {
-            down: [
-              { actionId: 'setInputSensitivity', options: { inputId: isSecondary, sensitivity: instance.state.inputSensitivities[isSecondary] || '4DBU' } },
-              { actionId: 'getInputSensitivity', options: { inputId: isSecondary } },
-            ],
-            up: [],
+            feedbackId: 'inputSensitivity',
+            options: { inputId: iid },
           },
-        ],
-        feedback: [
-          { feedbackId: 'inputSensitivity', options: { inputId: isSecondary } },
         ],
       });
       presets.push({
         type: 'button',
-        category: 'Analog Inputs',
-        name: `Trim ${iid === 100 ? 'Analog 2' : 'Analog 4'}`,
-        style: { text: `${iid === 100 ? 'Analog 2' : 'Analog 4'} Trim`, size: '14', color: '16777215', bgcolor: '0' },
-      steps: [
+        category: 'Inputs',
+        name: `Set ${label} Sens`,
+        style: { text: `Set ${label} Sens`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'setInputSensitivity', options: { inputId: iid, value: '4DBU' } }], up: [] }],
+        feedbacks: [],
+      });
+    }
+
+    // Get/Set Gain
+    presets.push({
+      type: 'button',
+      category: 'Inputs',
+      name: `Get ${label} Gain`,
+      style: { text: `Get ${label} Gain`, size: '14', color: '16777215' },
+      steps: [{ down: [{ actionId: 'getInputGain', options: { inputId: iid } }], up: [] }],
+      feedbacks: [
         {
-          down: [
-            { actionId: 'setInputGain', options: { inputId: isSecondary, gain: instance.state.inputGains[isSecondary] || 0 } },
-            { actionId: 'getInputTrim', options: { inputId: isSecondary } },
-          ],
-          up: [],
+          feedbackId: iid === 400 ? 'generatorGain' : 'inputTrim',
+          options: { inputId: iid },
         },
       ],
-      feedback: [
-        { feedbackId: 'inputTrim', options: { inputId: isSecondary } },
-      ],
     });
+    presets.push({
+      type: 'button',
+      category: 'Inputs',
+      name: `Set ${label} Gain`,
+      style: { text: `Set ${label} Gain`, size: '14', color: '16777215' },
+      steps: [{ down: [{ actionId: 'setInputGain', options: { inputId: iid, value: 0 } }], up: [] }],
+      feedbacks: [],
+    });
+
+    // Get/Set Stereo (only for IIDs 100, 102, 200)
+    if ([100, 102, 200].includes(iid)) {
+      presets.push({
+        type: 'button',
+        category: 'Inputs',
+        name: `Get ${label} Stereo`,
+        style: { text: `Get ${label} Stereo`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'getInputStereo', options: { inputId: iid } }], up: [] }],
+        feedbacks: [],
+      });
+      presets.push({
+        type: 'button',
+        category: 'Inputs',
+        name: `Set ${label} Stereo`,
+        style: { text: `Set ${label} Stereo`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'setInputStereo', options: { inputId: iid, value: '0' } }], up: [] }],
+        feedbacks: [],
+      });
     }
+
+    // Get/Set HPF Enable (only for IIDs 100-199)
+    if (iid >= 100 && iid <= 199) {
+      presets.push({
+        type: 'button',
+        category: 'Inputs',
+        name: `Get ${label} HPF`,
+        style: { text: `Get ${label} HPF`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'getInputHpfEnable', options: { inputId: iid } }], up: [] }],
+        feedbacks: [],
+      });
+      presets.push({
+        type: 'button',
+        category: 'Inputs',
+        name: `Set ${label} HPF`,
+        style: { text: `Set ${label} HPF`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'setInputHpfEnable', options: { inputId: iid, value: '0' } }], up: [] }],
+        feedbacks: [],
+      });
+    }
+
+    // Input EQ actions (only for IIDs 100-199)
+    if (iid >= 100 && iid <= 199) {
+      // Get/Set EQ Bypass
+      presets.push({
+        type: 'button',
+        category: 'Input EQ',
+        name: `Get ${label} EQ Bypass`,
+        style: { text: `Get ${label} EQ Bypass`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'getInputEqBypass', options: { inputId: iid } }], up: [] }],
+        feedbacks: [],
+      });
+      presets.push({
+        type: 'button',
+        category: 'Input EQ',
+        name: `Set ${label} EQ Bypass`,
+        style: { text: `Set ${label} EQ Bypass`, size: '14', color: '16777215' },
+        steps: [{ down: [{ actionId: 'setInputEqBypass', options: { inputId: iid, value: '0' } }], up: [] }],
+        feedbacks: [],
+      });
+    }
+  });
+
+  // Generic Configurable EQ Button
+  presets.push({
+    type: 'button',
+    category: 'Input EQ',
+    name: 'Configure Input EQ',
+    style: { text: 'Configure Input EQ', size: '14', color: '16777215' },
+    steps: [
+      {
+        down: [
+          {
+            actionId: 'getInputEqBandType', // Default action; will be overridden by options
+            options: {
+              inputId: 100,
+              eqBandId: 1,
+              actionType: 'getType', // Custom option to determine which action to trigger
+              typeValue: 'PARAMETRIC',
+              gainValue: 0,
+              freqValue: 100,
+              qValue: 0.7,
+              bypassValue: '0',
+            },
+          },
+        ],
+        up: [],
+      },
+    ],
+    feedbacks: [],
   });
 
   return presets;
