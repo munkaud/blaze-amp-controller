@@ -8,6 +8,7 @@ class SocketManager {
     this.commandDelay = 250;
     this.isProcessingCommand = false;
     this.pollingInterval = null;
+    this.isSubscribed = false; // Track subscription state
   }
 
   async setupSocket() {
@@ -52,6 +53,7 @@ class SocketManager {
         clearInterval(this.pollingInterval);
         this.pollingInterval = null;
       }
+      this.isSubscribed = false; // Reset subscription state on close
     });
   }
 
@@ -92,6 +94,15 @@ class SocketManager {
     this.queueCommand('GET SETUP.SYSTEM.CUSTOM2\n');
     this.queueCommand('GET SETUP.SYSTEM.CUSTOM3\n');
 
+    // Subscribe to dynamic updates after initial polling
+    setTimeout(() => {
+      if (this.socket && !this.isSubscribed) {
+        this.queueCommand('SUBSCRIBE\n');
+        this.isSubscribed = true;
+        this.instance.log('info', 'Subscribed to dynamic updates');
+      }
+    }, 10000); // Wait 10 seconds to ensure initial polling responses are received
+
     if (!this.pollingInterval) {
       this.pollingInterval = setInterval(() => {
         this.instance.log('info', 'Periodic polling');
@@ -106,6 +117,11 @@ class SocketManager {
         for (let zid = 1; zid <= this.instance.state.zones; zid++) {
           const zoneLetter = String.fromCharCode(64 + zid);
           this.queueCommand(`GET ZONE-${zoneLetter}.DYN.SIGNAL\n`);
+        }
+        // Optionally, we can periodically refresh output dynamic states if needed
+        for (let oid = 1; oid <= this.instance.state.outputs; oid++) {
+          this.queueCommand(`GET OUT-${oid}.DYN.SIGNAL\n`);
+          this.queueCommand(`GET OUT-${oid}.DYN.CLIP\n`);
         }
       }, 5000);
     }
@@ -143,8 +159,24 @@ class SocketManager {
 
   destroy() {
     if (this.socket) {
-      this.socket.close();
-      this.socket = null;
+      if (this.isSubscribed) {
+        // Send UNSUBSCRIBE before closing the socket
+        this.socket.send('UNSUBSCRIBE\n')
+          .then(() => {
+            this.instance.log('info', 'Unsubscribed from dynamic updates');
+          })
+          .catch((err) => {
+            this.instance.log('error', `Failed to unsubscribe: ${err.message}`);
+          })
+          .finally(() => {
+            this.socket.close();
+            this.socket = null;
+            this.isSubscribed = false;
+          });
+      } else {
+        this.socket.close();
+        this.socket = null;
+      }
     }
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
