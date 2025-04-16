@@ -1,8 +1,8 @@
 const systemParser = require('./lib/system_parser');
 const powerParser = require('./lib/power_parser');
-const InputsParser = require('./lib/inputs_parser');
-const zonesParser = require('./lib/zones_parser');
-const OutputsParser = require('./lib/outputs_parser');
+const InputsParser = require('./lib/input_parser');
+const zonesParser = require('./lib/zone_parser');
+const OutputsParser = require('./lib/output_parser');
 const miscParser = require('./lib/misc_parser');
 
 class MessageProcessor {
