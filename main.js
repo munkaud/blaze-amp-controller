@@ -8,6 +8,8 @@ const { initFeedbacks } = require('./feedbacks');
 const { initVariables, updateVariables } = require('./variables');
 const { initPresets, updatePresetsDebounced } = require('./presets');
 const config = require('./lib/config');
+const zoneParser = require('./lib/zone_parser');
+
 
 class BlazeAudioInstance extends InstanceBase {
   constructor(internal) {
@@ -20,6 +22,15 @@ class BlazeAudioInstance extends InstanceBase {
     this.socketManager = new SocketManager(this);
   }
 
+  handleCommand(command, value) {
+    if (command.startsWith('ZONE-')) {
+      const method = command.startsWith('GET') ? 'GET' : 'SET';
+      const result = zoneParser.handle(command, value, method);
+      if (result.error) console.log(result.error);
+      else self.sendCommand(result.cmd + '\r\n');
+    }
+  }
+  
   async init(config) {
     this.config = config;
     this.log('info', 'Initializing instance');
@@ -33,7 +44,7 @@ class BlazeAudioInstance extends InstanceBase {
     //this.log('debug', `mixActionsModule type: ${typeof mixActionsModule}`);
     const outputActionsModule = require('./actions/output_actions');
     this.log('debug', `outputActionsModule type: ${typeof outputActionsModule}`);
-    const registersActionsModule = require('./actions/registers_actions');
+    const registersActionsModule = require('./actions/register_actions');
     this.log('debug', `registersActionsModule type: ${typeof registersActionsModule}`);
     const subscribeActionsModule = require('./actions/subscribe_actions');
     this.log('debug', `subscribeActionsModule type: ${typeof subscribeActionsModule}`);
