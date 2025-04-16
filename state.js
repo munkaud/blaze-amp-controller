@@ -65,6 +65,14 @@ class State {
         outputHighpasses: {}, // OUT-{OID}.OUTPUT_HIGHPASS (Float, Hz)
         outputDynSignals: {}, // OUT-{OID}.DYN.SIGNAL (Float, dB)
         outputDynClips: {}, // OUT-{OID}.DYN.CLIP (Boolean)
+        inputDynSignals: {}, // IN-{iid}.DYN.SIGNAL (Float, dB)
+        inputDynClips: {},   // IN-{iid}.DYN.CLIP (Boolean)
+        zoneDynSignals: {},  // ZONE-{zid}.DYN.SIGNAL (Float, dB)
+        outputSrcChannels: {}, // OUT-{OID}.SRC_CHANNELS (Integer)
+        outputSrcChannelNames: {}, // OUT-{OID}.SRC_CHANNEL_NAMES (String)
+        outputSrcChannelGains: {}, // OUT-{OID}.SRC_CHANNEL_GAINS (Float, dB)
+        outputSrcChannelMutes: {}, // OUT-{OID}.SRC_CHANNEL_MUTES (Boolean)
+        outputSrcChannelPolarity: {}, // OUT-{OID}.SRC_CHANNEL_POLARITY (Integer)
       };
     }
   

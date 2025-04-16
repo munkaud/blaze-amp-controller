@@ -1,6 +1,6 @@
 const { combineRgb } = require('@companion-module/base');
 
-function initFeedbacks(instance) {
+module.exports = function (instance) {
   const feedbacks = {
     powerState: {
       type: 'boolean',
@@ -89,7 +89,5 @@ function initFeedbacks(instance) {
       },
     },
   };
-  instance.setFeedbackDefinitions(feedbacks);
-}
-
-module.exports = { initFeedbacks };
+  return feedbacks;
+};

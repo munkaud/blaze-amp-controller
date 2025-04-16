@@ -8,7 +8,7 @@ class SocketManager {
     this.commandDelay = 250;
     this.isProcessingCommand = false;
     this.pollingInterval = null;
-    this.isSubscribed = false; // Track subscription state
+    this.isSubscribed = false;
   }
 
   async setupSocket() {
@@ -53,7 +53,7 @@ class SocketManager {
         clearInterval(this.pollingInterval);
         this.pollingInterval = null;
       }
-      this.isSubscribed = false; // Reset subscription state on close
+      this.isSubscribed = false;
     });
   }
 
@@ -94,14 +94,14 @@ class SocketManager {
     this.queueCommand('GET SETUP.SYSTEM.CUSTOM2\n');
     this.queueCommand('GET SETUP.SYSTEM.CUSTOM3\n');
 
-    // Subscribe to dynamic updates after initial polling
-    setTimeout(() => {
-      if (this.socket && !this.isSubscribed) {
-        this.queueCommand('SUBSCRIBE\n');
-        this.isSubscribed = true;
-        this.instance.log('info', 'Subscribed to dynamic updates');
-      }
-    }, 10000); // Wait 10 seconds to ensure initial polling responses are received
+    // Add commands for zones
+    for (let zid = 1; zid <= 4; zid++) {
+      const zoneLetter = String.fromCharCode(64 + zid);
+      this.queueCommand(`GET ZONE-${zoneLetter}.NAME\n`);
+      this.queueCommand(`GET ZONE-${zoneLetter}.PRIMARY_SRC\n`);
+      this.queueCommand(`GET ZONE-${zoneLetter}.GAIN\n`);
+      this.queueCommand(`GET ZONE-${zoneLetter}.MUTE\n`);
+    }
 
     if (!this.pollingInterval) {
       this.pollingInterval = setInterval(() => {
@@ -118,16 +118,12 @@ class SocketManager {
           const zoneLetter = String.fromCharCode(64 + zid);
           this.queueCommand(`GET ZONE-${zoneLetter}.DYN.SIGNAL\n`);
         }
-        // Optionally, we can periodically refresh output dynamic states if needed
-        for (let oid = 1; oid <= this.instance.state.outputs; oid++) {
-          this.queueCommand(`GET OUT-${oid}.DYN.SIGNAL\n`);
-          this.queueCommand(`GET OUT-${oid}.DYN.CLIP\n`);
-        }
       }, 5000);
     }
   }
 
   queueCommand(command) {
+    this.instance.log('debug', `Queuing command: ${command.trim()}`);
     this.commandQueue.push(command);
     this.processCommandQueue();
   }
@@ -137,6 +133,7 @@ class SocketManager {
 
     this.isProcessingCommand = true;
     const command = this.commandQueue.shift();
+    this.instance.log('debug', `Sending command: ${command.trim()}`);
 
     if (this.socket) {
       this.socket.send(command)
@@ -160,7 +157,6 @@ class SocketManager {
   destroy() {
     if (this.socket) {
       if (this.isSubscribed) {
-        // Send UNSUBSCRIBE before closing the socket
         this.socket.send('UNSUBSCRIBE\n')
           .then(() => {
             this.instance.log('info', 'Unsubscribed from dynamic updates');
