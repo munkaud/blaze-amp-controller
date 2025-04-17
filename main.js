@@ -19,9 +19,9 @@ try {
         this.socket = null;
         this.responseBuffer = '';
         this.config = { ...configParser.getDefaultConfig(), ...this.config };
+        setupActions.setup(this);
         this.setupFeedback();
         this.setupPresets();
-        setupActions.setup(this);
         this.connectToAmp();
         this.updateStatus(InstanceStatus.Ok);
       } catch (err) {

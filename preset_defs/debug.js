@@ -5,13 +5,13 @@ module.exports = {
     bank: {
       style: 'text',
       text: 'Send Cmd',
-      size: '14',
+      size: 14,
       color: 16777215,
       bgcolor: 0
     },
     actions: [
       {
-        actionId: 'sendCommand',
+        action: 'sendCommand',
         options: {
           command: 'SET ZONE-A.DUCK.AUTO 1',
           value: ''
@@ -25,13 +25,13 @@ module.exports = {
     bank: {
       style: 'text',
       text: 'Power On',
-      size: '14',
+      size: 14,
       color: 16777215,
       bgcolor: 0
     },
     actions: [
       {
-        actionId: 'powerOn',
+        action: 'powerOn',
         options: {}
       }
     ],
@@ -48,13 +48,13 @@ module.exports = {
     bank: {
       style: 'text',
       text: 'Power Off',
-      size: '14',
+      size: 14,
       color: 16777215,
       bgcolor: 0
     },
     actions: [
       {
-        actionId: 'powerOff',
+        action: 'powerOff',
         options: {}
       }
     ],
