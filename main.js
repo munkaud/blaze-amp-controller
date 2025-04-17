@@ -51,7 +51,7 @@ try {
       const debugPresets = require('./preset_defs/debug');
       console.log('Debug presets loaded:', JSON.stringify(debugPresets, null, 2));
       this.setPresetDefinitions(debugPresets);
-      console.log(`Presets registered with setPresetDefinitions: ${debugPresets.length} presets`);
+      console.log(`Presets registered with setPresetDefinitions: ${Object.keys(debugPresets).length} presets`);
     }
 
     connectToAmp() {

@@ -1,7 +1,7 @@
 const { combineRgb } = require('@companion-module/base');
 
-module.exports = [
-  {
+module.exports = {
+  initialize: {
     type: 'button',
     category: 'Setup',
     label: 'Initialize',
@@ -14,7 +14,7 @@ module.exports = [
     },
     actions: [{ action: 'getConfig', options: {} }]
   },
-  {
+  sendRawCommand: {
     type: 'button',
     category: 'Debug',
     label: 'Send Raw Command',
@@ -27,4 +27,4 @@ module.exports = [
     },
     actions: [{ action: 'sendCommand', options: { command: 'SET ZONE-A.DUCK.AUTO 1', value: '' } }]
   }
-];
+};
