@@ -22,8 +22,8 @@ try {
         this.config = { ...configParser.getDefaultConfig(), ...this.config };
         setupActions.setup(this);
         this.setupFeedback();
-        this.setupPresets();
         this.connectToAmp();
+        this.setupPresets();
         this.updateStatus(InstanceStatus.Ok);
       } catch (err) {
         console.error(`Init error: ${err.message}`);
@@ -52,7 +52,10 @@ try {
       const debugPresets = require('./preset_defs/debug');
       console.log('Debug presets loaded:', JSON.stringify(debugPresets, null, 2));
       initPresets(this, { debug: debugPresets });
-      console.log('Presets registered with setPresetDefinitions');
+      console.log('Presets registered with initPresets');
+      // Fallback: Direct setPresetDefinitions
+      this.setPresetDefinitions(debugPresets);
+      console.log('Presets registered with direct setPresetDefinitions');
     }
 
     connectToAmp() {
