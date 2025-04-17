@@ -7,7 +7,7 @@ try {
     const inputParser = require('./lib/input_parser');
     const outputParser = require('./lib/output_parser');
     const zoneParser = require('./lib/zone_parser');
-    const configParser = require('./lib/config');
+    const configParser = require('./lib/module_config');
     const messageParser = require('./lib/message_parser');
   
     class BlazeAmpController extends InstanceBase {
