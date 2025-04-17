@@ -1,5 +1,5 @@
-module.exports = [
-  {
+module.exports = {
+  sendRawCommand: {
     category: 'Debug',
     label: 'Send Raw Command',
     bank: {
@@ -19,7 +19,7 @@ module.exports = [
       }
     ]
   },
-  {
+  powerOn: {
     category: 'Power',
     label: 'Power On',
     bank: {
@@ -42,7 +42,7 @@ module.exports = [
       }
     ]
   },
-  {
+  powerOff: {
     category: 'Power',
     label: 'Power Off',
     bank: {
@@ -65,4 +65,4 @@ module.exports = [
       }
     ]
   }
-];
+};
