@@ -10,16 +10,22 @@ try {
   const configParser = require('./lib/module_config');
   const messageParser = require('./lib/message_parser');
   const tcp = require('./lib/module_tcp');
+  const setupActions = require('./actions/setup_actions');
 
   class BlazeAmpController extends InstanceBase {
     init() {
       console.log('Initializing BlazeAmpController');
-      this.socket = null;
-      this.responseBuffer = '';
-      this.config = { ...configParser.getDefaultConfig(), ...this.config };
-      this.setupActions();
-      this.setupFeedback();
-      this.connectToAmp();
+      try {
+        this.socket = null;
+        this.responseBuffer = '';
+        this.config = { ...configParser.getDefaultConfig(), ...this.config };
+        setupActions.setup(this);
+        this.setupFeedback();
+        this.connectToAmp();
+      } catch (err) {
+        console.error(`Init error: ${err.message}`);
+        throw err;
+      }
     }
 
     configFields() {
@@ -75,62 +81,6 @@ try {
 
     sendCommand(cmd) {
       tcp.sendCommand(this, cmd);
-    }
-
-    setupActions() {
-      this.setActionDefinitions({
-        getConfig: {
-          label: 'Get Config',
-          options: [],
-          callback: () => {
-            try {
-              const configActions = require('./actions/config_actions');
-              configActions.getConfig.call(this);
-            } catch (err) {
-              console.log(`getConfig error: ${err.message}`);
-            }
-          }
-        },
-        powerOn: {
-          label: 'Power On',
-          options: [],
-          callback: () => {
-            try {
-              const powerActions = require('./actions/power_actions');
-              powerActions.powerOn.call(this);
-            } catch (err) {
-              console.log(`powerOn error: ${err.message}`);
-            }
-          }
-        },
-        powerOff: {
-          label: 'Power Off',
-          options: [],
-          callback: () => {
-            try {
-              const powerActions = require('./actions/power_actions');
-              powerActions.powerOff.call(this);
-            } catch (err) {
-              console.log(`powerOff error: ${err.message}`);
-            }
-          }
-        },
-        sendCommand: {
-          label: 'Send Raw Command',
-          options: [
-            { type: 'textinput', label: 'Command', id: 'command', default: 'SET ZONE-A.DUCK.AUTO 1' },
-            { type: 'textinput', label: 'Value', id: 'value', default: '' }
-          ],
-          callback: (action) => {
-            try {
-              const actions = require('./actions');
-              actions.sendCommand.call(this, action.options);
-            } catch (err) {
-              console.log(`sendCommand error: ${err.message}`);
-            }
-          }
-        }
-      });
     }
 
     setupFeedback() {
