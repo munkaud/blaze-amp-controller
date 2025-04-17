@@ -11,6 +11,7 @@ try {
   const messageParser = require('./lib/message_parser');
   const tcp = require('./lib/module_tcp');
   const setupActions = require('./actions/setup_actions');
+  const { initPresets } = require('./presets');
 
   class BlazeAmpController extends InstanceBase {
     init() {
@@ -48,18 +49,9 @@ try {
 
     setupPresets() {
       console.log('Setting up presets');
-      const presets = require('./preset_defs/debug');
-      console.log('Presets loaded:', JSON.stringify(presets, null, 2));
-      this.setPresetDefinitions(presets);
-      // Fallback: Mimic presets.js direct call
-      this.setPresetDefinitions({
-        initialize: {
-          category: 'Setup',
-          label: 'Initialize',
-          bank: { style: 'text', text: 'Init', size: '14', color: '16777215', bgcolor: '0' },
-          actions: [{ action: 'getConfig', options: {} }]
-        }
-      });
+      const debugPresets = require('./preset_defs/debug');
+      console.log('Debug presets loaded:', JSON.stringify(debugPresets, null, 2));
+      initPresets(this, { debug: debugPresets });
     }
 
     connectToAmp() {
