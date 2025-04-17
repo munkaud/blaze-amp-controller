@@ -1,15 +1,16 @@
 try {
-  const { CompanionModule } = require('@companion-module/base');
+  const { InstanceBase, runEntrypoint } = require('@companion-module/base');
+  if (!InstanceBase) {
+    throw new Error('InstanceBase is undefined - check @companion-module/base installation');
+  }
+
   const inputParser = require('./lib/input_parser');
   const outputParser = require('./lib/output_parser');
   const zoneParser = require('./lib/zone_parser');
   const configParser = require('./lib/module_config');
   const messageParser = require('./lib/message_parser');
-  if (!InstanceBase) {
-    throw new Error('InstanceBase is undefined - check @companion-module/base installation');
-  }
 
-  class BlazeAmpController extends CompanionModule {
+  class BlazeAmpController extends InstanceBase {
     init() {
       console.log('Initializing BlazeAmpController');
       this.config = { ...configParser.getDefaultConfig(), ...this.config };
@@ -32,13 +33,13 @@ try {
           console.log(`Zone error: ${result.error}`);
           return;
         }
-        this.sendCommand(result.cmd + '\r\n');
+        this.sendCommand(`${result.cmd}\r\n`);
       } else if (command.startsWith('IN-')) {
         const result = inputParser.handle(command, value);
-        if (result.cmd) this.sendCommand(result.cmd + '\r\n');
+        if (result.cmd) this.sendCommand(`${result.cmd}\r\n`);
       } else if (command.startsWith('OUT-')) {
         const result = outputParser.handle(command, value);
-        if (result.cmd) this.sendCommand(result.cmd + '\r\n');
+        if (result.cmd) this.sendCommand(`${result.cmd}\r\n`);
       } else if (command === 'POWER_ON' || command === 'POWER_OFF') {
         this.sendCommand(`${command}\r\n`);
       } else if (command.startsWith('GET SYSTEM.DEVICE')) {
@@ -70,7 +71,7 @@ try {
     }
 
     setupActions() {
-      this.setActions({
+      this.setActionDefinitions({
         getConfig: {
           label: 'Get Config',
           options: [],
@@ -83,6 +84,30 @@ try {
             }
           }
         },
+        powerOn: {
+          label: 'Power On',
+          options: [],
+          callback: () => {
+            try {
+              const powerActions = require('./actions/power_actions');
+              powerActions.powerOn.call(this);
+            } catch (err) {
+              console.log(`powerOn error: ${err.message}`);
+            }
+          }
+        },
+        powerOff: {
+          label: 'Power Off',
+          options: [],
+          callback: () => {
+            try {
+              const powerActions = require('./actions/power_actions');
+              powerActions.powerOff.call(this);
+            } catch (err) {
+              console.log(`powerOff error: ${err.message}`);
+            }
+          }
+        },
         sendCommand: {
           label: 'Send Raw Command',
           options: [
@@ -91,7 +116,8 @@ try {
           ],
           callback: (action) => {
             try {
-              this.handleCommand(action.options.command, action.options.value);
+              const actions = require('./actions');
+              actions.sendCommand.call(this, action.options);
             } catch (err) {
               console.log(`sendCommand error: ${err.message}`);
             }
@@ -119,7 +145,7 @@ try {
     }
   }
 
-  module.exports = BlazeAmpController;
+  runEntrypoint(BlazeAmpController, []);
 } catch (err) {
   console.error(`Module load error: ${err.message}`);
   throw err;
