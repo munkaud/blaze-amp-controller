@@ -21,6 +21,7 @@ try {
         this.config = { ...configParser.getDefaultConfig(), ...this.config };
         setupActions.setup(this);
         this.setupFeedback();
+        this.setupPresets();
         this.connectToAmp();
         this.updateStatus(InstanceStatus.Ok);
       } catch (err) {
@@ -43,6 +44,12 @@ try {
       this.config = { ...configParser.getDefaultConfig(), ...config };
       this.connectToAmp();
       this.updateStatus(InstanceStatus.Ok);
+    }
+
+    setupPresets() {
+      console.log('Setting up presets');
+      const presets = require('./preset_defs/debug');
+      this.setPresetDefinitions(presets);
     }
 
     connectToAmp() {
