@@ -12,7 +12,7 @@
 		"url": "git+https://github.com/munkaud/blaze-amp-controller"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.11.2"
+		"@companion-module/base": "^1.9.0"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^2.1.1",

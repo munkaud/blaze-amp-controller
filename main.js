@@ -1,5 +1,6 @@
 try {
   const { InstanceBase, runEntrypoint } = require('@companion-module/base');
+  const net = require('net');
   if (!InstanceBase) {
     throw new Error('InstanceBase is undefined - check @companion-module/base installation');
   }
@@ -11,6 +12,12 @@ try {
   const messageParser = require('./lib/message_parser');
 
   class BlazeAmpController extends InstanceBase {
+    constructor() {
+      super();
+      this.socket = null;
+      this.responseBuffer = '';
+    }
+
     init() {
       console.log('Initializing BlazeAmpController');
       this.config = { ...configParser.getDefaultConfig(), ...this.config };
@@ -21,7 +28,42 @@ try {
 
     connectToAmp() {
       console.log(`Connecting to amp at ${this.config.host}:${this.config.port}`);
-      // Your TCP logic (e.g., net.Socket)
+      if (this.socket) {
+        this.socket.destroy();
+      }
+      this.socket = new net.Socket();
+      this.socket.setEncoding('utf8');
+
+      this.socket.on('connect', () => {
+        console.log('Connected to amp');
+        this.setVariable('connection_state', 'connected');
+      });
+
+      this.socket.on('data', (data) => {
+        this.responseBuffer += data;
+        const responses = this.responseBuffer.split('\r\n');
+        this.responseBuffer = responses.pop(); // Keep incomplete response
+        responses.forEach((response) => {
+          if (response) this.onResponse(response);
+        });
+      });
+
+      this.socket.on('error', (err) => {
+        console.log(`Socket error: ${err.message}`);
+        this.setVariable('connection_state', 'error');
+        this.socket.destroy();
+        this.socket = null;
+        setTimeout(() => this.connectToAmp(), 5000); // Retry after 5s
+      });
+
+      this.socket.on('close', () => {
+        console.log('Connection closed');
+        this.setVariable('connection_state', 'disconnected');
+        this.socket = null;
+        setTimeout(() => this.connectToAmp(), 5000);
+      });
+
+      this.socket.connect(this.config.port, this.config.host);
     }
 
     handleCommand(command, value) {
@@ -58,16 +100,23 @@ try {
         console.log(`Set system_${parsed.param.toLowerCase()} to ${parsed.value}`);
       } else if (parsed.type === 'success') {
         console.log('Command succeeded');
+        this.setVariable('last_command_status', 'success');
       } else if (parsed.type === 'error') {
         console.log(`Error: ${parsed.code}`);
+        this.setVariable('last_command_status', `error_${parsed.code}`);
       } else {
         console.log(`Unknown response: ${response}`);
       }
     }
 
     sendCommand(cmd) {
+      if (!this.socket || this.socket.destroyed) {
+        console.log(`Cannot send: ${cmd.trim()} (no connection)`);
+        this.connectToAmp();
+        return;
+      }
       console.log(`Sending: ${cmd}`);
-      // Your TCP logic
+      this.socket.write(cmd);
     }
 
     setupActions() {
@@ -140,8 +189,28 @@ try {
               bgcolor: state === 'ON' ? 0x00FF00 : 0xFF0000 // Forest green, deep red
             };
           }
+        },
+        connectionState: {
+          type: 'advanced',
+          label: 'Connection State',
+          options: [],
+          callback: () => {
+            const state = this.getVariable('connection_state') || 'disconnected';
+            return {
+              text: state === 'connected' ? '✓ Connected' : 'Disconnected',
+              bgcolor: state === 'connected' ? 0x00FF00 : 0xFF0000
+            };
+          }
         }
       });
+    }
+
+    destroy() {
+      if (this.socket) {
+        this.socket.destroy();
+        this.socket = null;
+      }
+      console.log('Module destroyed');
     }
   }
 
