@@ -49,6 +49,7 @@ try {
     setupPresets() {
       console.log('Setting up presets');
       const presets = require('./preset_defs/debug');
+      console.log('Presets loaded:', JSON.stringify(presets, null, 2));
       this.setPresetDefinitions(presets);
     }
 

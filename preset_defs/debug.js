@@ -1,10 +1,68 @@
-module.exports = {
-    debugCommand: {
-      label: 'Send Raw Command',
-      options: [
-        { type: 'textinput', label: 'Command', id: 'command', default: 'SET ZONE-A.DUCK.AUTO 1' },
-        { type: 'textinput', label: 'Value', id: 'value', default: '' }
-      ],
-      actions: [{ action: 'sendCommand', options: { command: '$(this:command)', value: '$(this:value)' } }]
-    }
-  };
+module.exports = [
+  {
+    category: 'Debug',
+    label: 'Send Raw Command',
+    bank: {
+      style: 'text',
+      text: 'Send Cmd',
+      size: '14',
+      color: 16777215,
+      bgcolor: 0
+    },
+    actions: [
+      {
+        actionId: 'sendCommand',
+        options: {
+          command: 'SET ZONE-A.DUCK.AUTO 1',
+          value: ''
+        }
+      }
+    ]
+  },
+  {
+    category: 'Power',
+    label: 'Power On',
+    bank: {
+      style: 'text',
+      text: 'Power On',
+      size: '14',
+      color: 16777215,
+      bgcolor: 0
+    },
+    actions: [
+      {
+        actionId: 'powerOn',
+        options: {}
+      }
+    ],
+    feedbacks: [
+      {
+        feedbackId: 'powerState',
+        options: {}
+      }
+    ]
+  },
+  {
+    category: 'Power',
+    label: 'Power Off',
+    bank: {
+      style: 'text',
+      text: 'Power Off',
+      size: '14',
+      color: 16777215,
+      bgcolor: 0
+    },
+    actions: [
+      {
+        actionId: 'powerOff',
+        options: {}
+      }
+    ],
+    feedbacks: [
+      {
+        feedbackId: 'powerState',
+        options: {}
+      }
+    ]
+  }
+];
