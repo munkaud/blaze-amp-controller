@@ -22,6 +22,10 @@ try {
       this.connectToAmp();
     }
 
+    configFields() {
+      return configParser.getConfigFields();
+    }
+
     connectToAmp() {
       tcp.createConnection(this);
     }
