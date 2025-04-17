@@ -1,5 +1,5 @@
 try {
-  const { InstanceBase, runEntrypoint } = require('@companion-module/base');
+  const { InstanceBase, runEntrypoint, InstanceStatus } = require('@companion-module/base');
   if (!InstanceBase) {
     throw new Error('InstanceBase is undefined - check @companion-module/base installation');
   }
@@ -22,8 +22,10 @@ try {
         setupActions.setup(this);
         this.setupFeedback();
         this.connectToAmp();
+        this.updateStatus(InstanceStatus.Ok);
       } catch (err) {
         console.error(`Init error: ${err.message}`);
+        this.updateStatus(InstanceStatus.Error, err.message);
         throw err;
       }
     }
@@ -34,6 +36,13 @@ try {
 
     getConfigFields() {
       return configParser.getConfigFields();
+    }
+
+    updateConfig(config) {
+      console.log('Updating config');
+      this.config = { ...configParser.getDefaultConfig(), ...config };
+      this.connectToAmp();
+      this.updateStatus(InstanceStatus.Ok);
     }
 
     connectToAmp() {
@@ -59,7 +68,7 @@ try {
       } else if (command === 'POWER_ON' || command === 'POWER_OFF') {
         this.sendCommand(`${command}\r\n`);
       } else if (command.startsWith('GET SYSTEM.DEVICE')) {
-        this.sendCommand(`${result.cmd}\r\n`);
+        this.sendCommand(`${command}\r\n`);
       }
     }
 
