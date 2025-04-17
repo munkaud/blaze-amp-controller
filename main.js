@@ -51,6 +51,15 @@ try {
       const presets = require('./preset_defs/debug');
       console.log('Presets loaded:', JSON.stringify(presets, null, 2));
       this.setPresetDefinitions(presets);
+      // Fallback: Mimic presets.js direct call
+      this.setPresetDefinitions({
+        initialize: {
+          category: 'Setup',
+          label: 'Initialize',
+          bank: { style: 'text', text: 'Init', size: '14', color: '16777215', bgcolor: '0' },
+          actions: [{ action: 'getConfig', options: {} }]
+        }
+      });
     }
 
     connectToAmp() {
