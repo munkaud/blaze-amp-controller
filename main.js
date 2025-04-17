@@ -1,6 +1,5 @@
 try {
   const { InstanceBase, runEntrypoint } = require('@companion-module/base');
-  const net = require('net');
   if (!InstanceBase) {
     throw new Error('InstanceBase is undefined - check @companion-module/base installation');
   }
@@ -10,16 +9,13 @@ try {
   const zoneParser = require('./lib/zone_parser');
   const configParser = require('./lib/module_config');
   const messageParser = require('./lib/message_parser');
+  const tcp = require('./lib/module_tcp');
 
   class BlazeAmpController extends InstanceBase {
-    constructor() {
-      super();
-      this.socket = null;
-      this.responseBuffer = '';
-    }
-
     init() {
       console.log('Initializing BlazeAmpController');
+      this.socket = null;
+      this.responseBuffer = '';
       this.config = { ...configParser.getDefaultConfig(), ...this.config };
       this.setupActions();
       this.setupFeedback();
@@ -27,43 +23,7 @@ try {
     }
 
     connectToAmp() {
-      console.log(`Connecting to amp at ${this.config.host}:${this.config.port}`);
-      if (this.socket) {
-        this.socket.destroy();
-      }
-      this.socket = new net.Socket();
-      this.socket.setEncoding('utf8');
-
-      this.socket.on('connect', () => {
-        console.log('Connected to amp');
-        this.setVariable('connection_state', 'connected');
-      });
-
-      this.socket.on('data', (data) => {
-        this.responseBuffer += data;
-        const responses = this.responseBuffer.split('\r\n');
-        this.responseBuffer = responses.pop(); // Keep incomplete response
-        responses.forEach((response) => {
-          if (response) this.onResponse(response);
-        });
-      });
-
-      this.socket.on('error', (err) => {
-        console.log(`Socket error: ${err.message}`);
-        this.setVariable('connection_state', 'error');
-        this.socket.destroy();
-        this.socket = null;
-        setTimeout(() => this.connectToAmp(), 5000); // Retry after 5s
-      });
-
-      this.socket.on('close', () => {
-        console.log('Connection closed');
-        this.setVariable('connection_state', 'disconnected');
-        this.socket = null;
-        setTimeout(() => this.connectToAmp(), 5000);
-      });
-
-      this.socket.connect(this.config.port, this.config.host);
+      tcp.createConnection(this);
     }
 
     handleCommand(command, value) {
@@ -110,13 +70,7 @@ try {
     }
 
     sendCommand(cmd) {
-      if (!this.socket || this.socket.destroyed) {
-        console.log(`Cannot send: ${cmd.trim()} (no connection)`);
-        this.connectToAmp();
-        return;
-      }
-      console.log(`Sending: ${cmd}`);
-      this.socket.write(cmd);
+      tcp.sendCommand(this, cmd);
     }
 
     setupActions() {
@@ -206,10 +160,7 @@ try {
     }
 
     destroy() {
-      if (this.socket) {
-        this.socket.destroy();
-        this.socket = null;
-      }
+      tcp.destroy(this);
       console.log('Module destroyed');
     }
   }
