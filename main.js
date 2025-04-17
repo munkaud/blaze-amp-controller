@@ -11,7 +11,6 @@ try {
   const messageParser = require('./lib/message_parser');
   const tcp = require('./lib/module_tcp');
   const setupActions = require('./actions/setup_actions');
-  const { initPresets } = require('./presets');
 
   class BlazeAmpController extends InstanceBase {
     init() {
@@ -51,11 +50,8 @@ try {
       console.log('Setting up presets');
       const debugPresets = require('./preset_defs/debug');
       console.log('Debug presets loaded:', JSON.stringify(debugPresets, null, 2));
-      initPresets(this, { debug: debugPresets });
-      console.log('Presets registered with initPresets');
-      // Fallback: Direct setPresetDefinitions
       this.setPresetDefinitions(debugPresets);
-      console.log('Presets registered with direct setPresetDefinitions');
+      console.log(`Presets registered with setPresetDefinitions: ${debugPresets.length} presets`);
     }
 
     connectToAmp() {
