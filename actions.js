@@ -1,6 +1,5 @@
 module.exports = {
-  sendCommand(options) {
-    const { command, value } = options;
-    this.handleCommand(command, value);
+  sendCommand(moduleInstance, options) {
+    moduleInstance.handleCommand(options.command, options.value);
   }
 };

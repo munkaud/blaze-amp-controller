@@ -1,6 +1,7 @@
-const configParser = require('../lib/config');
 module.exports = {
-  getConfig() {
-    this.sendCommand(configParser.getConfigCommand());
+  getConfig(moduleInstance) {
+    const configParser = require('../lib/module_config');
+    const cmd = configParser.getConfigCommand();
+    moduleInstance.sendCommand(cmd);
   }
 };
