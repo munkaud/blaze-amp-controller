@@ -53,17 +53,17 @@ try {
       console.log(`Received: ${response}`);
       const parsed = messageParser.parse(response);
       if (parsed.type === 'compressor' || parsed.type === 'ducker' || parsed.type === 'zone') {
-        this.setVariable(`${parsed.type}_${parsed.param.toLowerCase()}`, parsed.value);
+        this.setVariableValues({ [`${parsed.type}_${parsed.param.toLowerCase()}`]: parsed.value });
         console.log(`Set ${parsed.type}_${parsed.param.toLowerCase()} to ${parsed.value}`);
       } else if (parsed.type === 'system') {
-        this.setVariable(`system_${parsed.param.toLowerCase()}`, parsed.value);
+        this.setVariableValues({ [`system_${parsed.param.toLowerCase()}`]: parsed.value });
         console.log(`Set system_${parsed.param.toLowerCase()} to ${parsed.value}`);
       } else if (parsed.type === 'success') {
         console.log('Command succeeded');
-        this.setVariable('last_command_status', 'success');
+        this.setVariableValues({ last_command_status: 'success' });
       } else if (parsed.type === 'error') {
         console.log(`Error: ${parsed.code}`);
-        this.setVariable('last_command_status', `error_${parsed.code}`);
+        this.setVariableValues({ last_command_status: `error_${parsed.code}` });
       } else {
         console.log(`Unknown response: ${response}`);
       }
