@@ -32,6 +32,10 @@ try {
       return configParser.getConfigFields();
     }
 
+    getConfigFields() {
+      return configParser.getConfigFields();
+    }
+
     connectToAmp() {
       tcp.createConnection(this);
     }
@@ -55,7 +59,7 @@ try {
       } else if (command === 'POWER_ON' || command === 'POWER_OFF') {
         this.sendCommand(`${command}\r\n`);
       } else if (command.startsWith('GET SYSTEM.DEVICE')) {
-        this.sendCommand(`${command}\r\n`);
+        this.sendCommand(`${result.cmd}\r\n`);
       }
     }
 
