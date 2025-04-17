@@ -1,12 +1,16 @@
 try {
-    const { CompanionModule } = require('@companion-module/base');
+    const { InstanceBase, runEntrypoint } = require('@companion-module/base');
+    if (!InstanceBase) {
+      throw new Error('InstanceBase is undefined - check @companion-module/base installation');
+    }
+  
     const inputParser = require('./lib/input_parser');
     const outputParser = require('./lib/output_parser');
     const zoneParser = require('./lib/zone_parser');
     const configParser = require('./lib/config');
     const messageParser = require('./lib/message_parser');
   
-    class BlazeAmpController extends CompanionModule {
+    class BlazeAmpController extends InstanceBase {
       init() {
         console.log('Initializing BlazeAmpController');
         this.config = { ...configParser.getDefaultConfig(), ...this.config };
@@ -29,13 +33,13 @@ try {
             console.log(`Zone error: ${result.error}`);
             return;
           }
-          this.sendCommand(result.cmd + '\r\n');
+          this.sendCommand(`${result.cmd}\r\n`); // Using template literals for consistency
         } else if (command.startsWith('IN-')) {
           const result = inputParser.handle(command, value);
-          if (result.cmd) this.sendCommand(result.cmd + '\r\n');
+          if (result.cmd) this.sendCommand(`${result.cmd}\r\n`);
         } else if (command.startsWith('OUT-')) {
           const result = outputParser.handle(command, value);
-          if (result.cmd) this.sendCommand(result.cmd + '\r\n');
+          if (result.cmd) this.sendCommand(`${result.cmd}\r\n`);
         } else if (command === 'POWER_ON' || command === 'POWER_OFF') {
           this.sendCommand(`${command}\r\n`);
         } else if (command.startsWith('GET SYSTEM.DEVICE')) {
@@ -116,7 +120,7 @@ try {
       }
     }
   
-    module.exports = BlazeAmpController;
+    runEntrypoint(BlazeAmpController, []);
   } catch (err) {
     console.error(`Module load error: ${err.message}`);
     throw err;
