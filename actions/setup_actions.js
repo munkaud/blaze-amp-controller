@@ -2,7 +2,7 @@ module.exports = {
     setup(moduleInstance) {
       const powerActions = require('./power_actions');
       const configActions = require('./config_actions');
-      const actions = require('./actions');
+      const actions = require('../actions');
   
       moduleInstance.setActionDefinitions({
         getConfig: {
