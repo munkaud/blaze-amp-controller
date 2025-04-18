@@ -50,8 +50,34 @@ try {
       console.log('Setting up presets');
       const debugPresets = require('./preset_defs/debug');
       console.log('Debug presets loaded:', JSON.stringify(debugPresets, null, 2));
-      this.setPresetDefinitions(debugPresets);
-      console.log(`Presets registered with setPresetDefinitions: ${Object.keys(debugPresets).length} presets`);
+
+      // Validate presets
+      const validatedPresets = {};
+      for (const [id, preset] of Object.entries(debugPresets)) {
+        if (!preset.category || !preset.label || !preset.bank || !preset.actions) {
+          console.error(`Invalid preset ${id}: Missing required fields`);
+          continue;
+        }
+        if (!Array.isArray(preset.actions) || preset.actions.length === 0) {
+          console.error(`Invalid preset ${id}: Actions must be a non-empty array`);
+          continue;
+        }
+        for (const action of preset.actions) {
+          if (!action.action || !action.options) {
+            console.error(`Invalid preset ${id}: Action missing action or options`);
+            continue;
+          }
+        }
+        validatedPresets[id] = preset;
+      }
+
+      if (Object.keys(validatedPresets).length === 0) {
+        console.error('No valid presets to register');
+        return;
+      }
+
+      this.setPresetDefinitions(validatedPresets);
+      console.log(`Presets registered with setPresetDefinitions: ${Object.keys(validatedPresets).length} presets`);
     }
 
     connectToAmp() {

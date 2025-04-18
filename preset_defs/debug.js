@@ -2,26 +2,24 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = {
   initialize: {
-    type: 'button',
     category: 'Setup',
     label: 'Initialize',
     bank: {
       style: 'text',
       text: 'Init',
-      size: 14,
+      size: '14',
       color: combineRgb(255, 255, 255),
       bgcolor: combineRgb(0, 0, 0)
     },
     actions: [{ action: 'getConfig', options: {} }]
   },
   sendRawCommand: {
-    type: 'button',
     category: 'Debug',
     label: 'Send Raw Command',
     bank: {
       style: 'text',
       text: 'Send Cmd',
-      size: 14,
+      size: '14',
       color: combineRgb(255, 255, 255),
       bgcolor: combineRgb(0, 0, 0)
     },
