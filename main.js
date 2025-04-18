@@ -131,14 +131,13 @@ class BlazeAmpInstance extends InstanceBase {
           this.checkFeedbacks('power_state');
         }
         if (msg.includes('CONFIG')) {
-          // Parse CONFIG for zones
           const zoneMatches = msg.match(/ZONE-[A-H]/g) || [];
           this.state.zones = [...new Set(zoneMatches)];
           if (!this.state.zones.length) {
             this.socket.send('GET ZONE.COUNT\n');
           } else {
             this.state.zones.forEach((zone) => {
-              this.socket.send(`GET LINK ${zone}\n`);
+              this.socket.send(`GET ${zone}.LINK\n`);
               this.socket.send(`GET ${zone}.STEREO\n`);
             });
           }
@@ -147,12 +146,12 @@ class BlazeAmpInstance extends InstanceBase {
           const count = parseInt(msg.split('"')[1]) || 4;
           this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
           this.state.zones.forEach((zone) => {
-            this.socket.send(`GET LINK ${zone}\n`);
+            this.socket.send(`GET ${zone}.LINK\n`);
             this.socket.send(`GET ${zone}.STEREO\n`);
           });
         }
-        if (msg.includes('LINK')) {
-          const [, , zone, link] = msg.split(' ');
+        if (msg.includes('.LINK')) {
+          const [, zone, link] = msg.split(' ');
           this.state.zoneLinks[zone] = link || null;
         }
         if (msg.includes('.STEREO')) {

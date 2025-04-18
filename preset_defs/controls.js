@@ -72,7 +72,7 @@ module.exports = (self) => [
         down: [
           {
             actionId: 'sendCommand',
-            options: { command: 'FACTORY_RESET', value: '' },
+            options: { command: 'SYSTEM.FACTORY_RESET', value: '' },
           },
         ],
         up: [],
