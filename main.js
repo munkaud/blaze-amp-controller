@@ -125,7 +125,7 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('data', (data) => {
         const msg = data.toString('utf8').trim();
         this.log('debug', `Received: ${msg}`);
-        if (msg.includes('ZONE') && !msg.includes('ZONE.COUNT') && !msg.includes('LINK') && !msg.includes('STEREO')) {
+        if (msg.includes('ZONE') && !msg.includes('ZONE.COUNT') && !msg.includes('STEREO')) {
           this.setVariableValues({ [`zone_status`]: msg });
         }
         if (msg.includes('SYSTEM.STATUS.POWER')) {
@@ -140,7 +140,6 @@ class BlazeAmpInstance extends InstanceBase {
             this.socket.send('GET ZONE.COUNT\n');
           } else {
             this.state.zones.forEach((zone) => {
-              this.socket.send(`GET ${zone}.LINK\n`);
               this.socket.send(`GET ${zone}.STEREO\n`);
             });
           }
@@ -149,17 +148,26 @@ class BlazeAmpInstance extends InstanceBase {
           const count = parseInt(msg.split('"')[1]) || 4;
           this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
           this.state.zones.forEach((zone) => {
-            this.socket.send(`GET ${zone}.LINK\n`);
             this.socket.send(`GET ${zone}.STEREO\n`);
           });
-        }
-        if (msg.includes('.LINK')) {
-          const [, zone, link] = msg.split(' ');
-          this.state.zoneLinks[zone] = link || null;
         }
         if (msg.includes('.STEREO')) {
           const [, zone, value] = msg.split(' ');
           this.state.zoneStereo[zone] = parseInt(value) || 0;
+          // If primary zone (A, C) has STEREO 1, mark secondary (B, D) as linked
+          if (zone === 'ZONE-A' && value === '1') this.state.zoneLinks['ZONE-B'] = 'ZONE-A';
+          if (zone === 'ZONE-C' && value === '1') this.state.zoneLinks['ZONE-D'] = 'ZONE-C';
+        }
+        if (msg.includes('GET ZONE') && msg.includes('Command Failed')) {
+          const zone = msg.match(/ZONE-[A-H]/)?.[0];
+          if (zone && ['ZONE-B', 'ZONE-D'].includes(zone)) {
+            // Assume secondary zone is linked to primary
+            this.state.zoneLinks[zone] = zone === 'ZONE-B' ? 'ZONE-A' : 'ZONE-C';
+            this.state.zoneStereo[zone] = 0; // Secondary zones don’t have STEREO
+          } else if (zone) {
+            this.state.zoneStereo[zone] = 0; // Primary zone, no stereo
+            this.state.zoneLinks[zone] = null;
+          }
         }
         if (msg.includes('SYSTEM.INPUTS')) {
           const inputs = msg.split('"')[1]?.split(',') || [];
