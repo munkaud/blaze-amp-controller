@@ -75,8 +75,8 @@ try {
           continue;
         }
         for (const action of preset.actions) {
-          if (!action.action || !action.options) {
-            console.error(`Invalid preset ${id}: Action missing action or options`);
+          if (!(action.action || action.actionId) || !action.options) {
+            console.error(`Invalid preset ${id}: Action missing action/actionId or options`);
             continue;
           }
         }
