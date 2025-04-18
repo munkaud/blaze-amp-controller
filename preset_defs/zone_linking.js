@@ -5,7 +5,8 @@ module.exports = (self) => {
   const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D', 'ZONE-E', 'ZONE-F', 'ZONE-G', 'ZONE-H'];
 
   zones.forEach((zone, index) => {
-    if (self.state.zoneLinks[zone] || index % 2 !== 0) return; // Skip secondary zones and non-primary indices
+    // Skip secondary zones or non-primary zones (B, D, F, H)
+    if (self.state.zoneLinks[zone] || index % 2 !== 0) return;
 
     const zoneLetter = zone.split('-')[1];
     presets.push({

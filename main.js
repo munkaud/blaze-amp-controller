@@ -106,18 +106,21 @@ class BlazeAmpInstance extends InstanceBase {
       let expectedResponses = 7; // API_VERSION, MODEL_NAME, SIGNAL_IN, SIGNAL_OUT, ZONE.COUNT, IN.COUNT, OUT.COUNT
       let receivedResponses = 0;
       let stereoQueriesSent = 0;
+      let stereoResponsesReceived = 0;
 
       this.socket.on('connect', () => {
         this.updateStatus('ok');
         this.log('info', 'Connected to Blaze Amp');
         this.socket.send('GET API_VERSION\n');
         setTimeout(() => {
+          this.socket.send('POWER_ON\n');
           this.socket.send('GET SYSTEM.DEVICE.MODEL_NAME\n');
           this.socket.send('GET SYSTEM.STATUS.SIGNAL_IN\n');
           this.socket.send('GET SYSTEM.STATUS.SIGNAL_OUT\n');
           this.socket.send('GET ZONE.COUNT\n');
           this.socket.send('GET IN.COUNT\n');
           this.socket.send('GET OUT.COUNT\n');
+          expectedResponses += 1; // Add POWER_ON
         }, 1000);
       });
 
@@ -170,6 +173,7 @@ class BlazeAmpInstance extends InstanceBase {
             this.state.zoneLinks[secondaryZone] = value === '1' ? zone : null;
             this.state.zoneStereo[secondaryZone] = 0;
             this.log('debug', `Set zoneLinks: ${JSON.stringify(this.state.zoneLinks)}`);
+            stereoResponsesReceived++;
           }
         }
         if (msg.includes('SYSTEM.STATUS.SIGNAL_IN')) {
@@ -185,17 +189,17 @@ class BlazeAmpInstance extends InstanceBase {
           }
         }
 
-        // Trigger presets update after all expected responses
-        if (receivedResponses >= expectedResponses) {
-          this.log('debug', `All responses received, updating presets`);
+        // Trigger presets update after all STEREO responses
+        if (stereoQueriesSent > 0 && stereoResponsesReceived >= stereoQueriesSent) {
+          this.log('debug', `All STEREO responses received, updating presets`);
           this.updatePresets();
         }
       });
 
       // Timeout to prevent hanging
       setTimeout(() => {
-        if (receivedResponses < expectedResponses) {
-          this.log('warn', 'Timeout waiting for responses, proceeding with presets');
+        if (stereoQueriesSent === 0 || stereoResponsesReceived < stereoQueriesSent) {
+          this.log('warn', 'Timeout waiting for STEREO responses, proceeding with presets');
           this.updatePresets();
         }
       }, 5000);
