@@ -1,14 +1,6 @@
 const { InstanceBase, runEntrypoint, TCPHelper } = require('@companion-module/base');
 const actions = require('./actions');
 const debug = require('./preset_defs/debug');
-const digitals = require('./preset_defs/digitals');
-const inputs = require('./preset_defs/inputs');
-const registers = require('./preset_defs/registers');
-const zone_settings = require('./preset_defs/zone_settings');
-const zone_duck = require('./preset_defs/zone_duck');
-const zone_compress = require('./preset_defs/zone_compress');
-const subscriptions = require('./preset_defs/subscriptions');
-const controls = require('./preset_defs/controls');
 
 class BlazeAmpInstance extends InstanceBase {
   constructor(internal) {
@@ -18,11 +10,6 @@ class BlazeAmpInstance extends InstanceBase {
   async init(config) {
     this.config = config;
     this.state = {
-      inputNames: {},
-      inputGains: {},
-      stereoPairs: {},
-      generatorGain: 0,
-      zones: 3,
       zoneLinks: {},
     };
 
@@ -67,17 +54,7 @@ class BlazeAmpInstance extends InstanceBase {
   }
 
   updatePresets() {
-    const presets = [
-      ...debug(this),
-      ...digitals(this),
-      ...inputs(this),
-      ...registers(this),
-      ...zone_settings(this),
-      ...zone_duck(this),
-      ...zone_compress(this),
-      ...subscriptions(this),
-      ...controls(this),
-    ];
+    const presets = [...debug(this)];
     this.setPresetDefinitions(presets);
   }
 
@@ -103,9 +80,6 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('data', (data) => {
         const msg = data.toString('utf8').trim();
         this.log('debug', `Received: ${msg}`);
-        if (msg.includes('ZONE')) {
-          this.setVariableValues({ [`zone_status`]: msg });
-        }
       });
     } else {
       this.updateStatus('bad_config');
