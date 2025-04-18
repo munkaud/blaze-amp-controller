@@ -107,11 +107,14 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('connect', () => {
         this.updateStatus('ok');
         this.log('info', 'Connected to Blaze Amp');
-        // Poll configuration
-        this.socket.send('GET CONFIG\n');
-        this.socket.send('GET SYSTEM.INPUTS\n');
-        this.socket.send('GET SYSTEM.OUTPUTS\n');
-        this.socket.send('GET ZONE.COUNT\n');
+        // Initialize connection
+        this.socket.send('GET API_VERSION\n');
+        setTimeout(() => {
+          this.socket.send('GET CONFIG\n');
+          this.socket.send('GET SYSTEM.INPUTS\n');
+          this.socket.send('GET SYSTEM.OUTPUTS\n');
+          this.socket.send('GET ZONE.COUNT\n');
+        }, 1000); // 1s delay
       });
 
       this.socket.on('error', (err) => {
