@@ -2,17 +2,20 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = (self) => {
   const presets = [];
-  const zones = ['A', 'B', 'C'];
+  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D', 'ZONE-E', 'ZONE-F', 'ZONE-G', 'ZONE-H'];
 
-  zones.forEach(zone => {
+  zones.forEach((zone) => {
+    if (self.state.zoneLinks[zone]) return;
+
+    const zoneLetter = zone.split('-')[1];
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Get Zone ${zone} Name`,
-      style: { text: `Get Zone ${zone} Name`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Get Zone ${zoneLetter} Name`,
+      style: { text: `Get Zone ${zoneLetter} Name`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `GET ZONE-${zone}.NAME`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `GET ${zone}.NAME`, value: '' } }],
           up: []
         }
       ],
@@ -20,12 +23,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Name`,
-      style: { text: `Set Zone ${zone} Name`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Name`,
+      style: { text: `Set Zone ${zoneLetter} Name`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.NAME Zone${zone}`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.NAME Zone${zoneLetter}`, value: '' } }],
           up: []
         }
       ],
@@ -33,12 +36,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Gain`,
-      style: { text: `Set Gain ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Gain`,
+      style: { text: `Set Gain ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.GAIN 0`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.GAIN 0`, value: '' } }],
           up: []
         }
       ],
@@ -46,12 +49,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Increment Zone ${zone} Gain`,
-      style: { text: `Inc Gain ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Increment Zone ${zoneLetter} Gain`,
+      style: { text: `Inc Gain ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `INC ZONE-${zone}.GAIN 1`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `INC ${zone}.GAIN 1`, value: '' } }],
           up: []
         }
       ],
@@ -59,12 +62,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Mute`,
-      style: { text: `Mute ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Decrement Zone ${zoneLetter} Gain`,
+      style: { text: `Dec Gain ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.MUTE 1`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `INC ${zone}.GAIN -1`, value: '' } }],
           up: []
         }
       ],
@@ -72,12 +75,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Primary Source`,
-      style: { text: `Primary Src ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Mute`,
+      style: { text: `Mute ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.PRIMARY_SRC 100`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.MUTE 1`, value: '' } }],
           up: []
         }
       ],
@@ -85,12 +88,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Priority Source`,
-      style: { text: `Priority Src ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Primary Source`,
+      style: { text: `Primary Src ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.PRIORITY_SRC 200`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.PRIMARY_SRC MIC1`, value: '' } }],
           up: []
         }
       ],
@@ -98,8 +101,21 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Get Zone ${zone} Count`,
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Priority Source`,
+      style: { text: `Priority Src ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      steps: [
+        {
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.PRIORITY_SRC LINE1`, value: '' } }],
+          up: []
+        }
+      ],
+      feedbacks: []
+    });
+    presets.push({
+      type: 'button',
+      category: `Zone ${zoneLetter}`,
+      name: `Get Zone Count`,
       style: { text: `Get Zone Count`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
@@ -111,12 +127,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Gain Min`,
-      style: { text: `Gain Min ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Gain Min`,
+      style: { text: `Gain Min ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.GAIN_MIN -60`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.GAIN_MIN -60`, value: '' } }],
           up: []
         }
       ],
@@ -124,12 +140,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Gain Max`,
-      style: { text: `Gain Max ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Gain Max`,
+      style: { text: `Gain Max ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.GAIN_MAX 0`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.GAIN_MAX 0`, value: '' } }],
           up: []
         }
       ],
@@ -137,12 +153,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} Stereo`,
-      style: { text: `Stereo ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} Stereo`,
+      style: { text: `Stereo ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.STEREO 0`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.STEREO 0`, value: '' } }],
           up: []
         }
       ],
@@ -150,12 +166,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Set Zone ${zone} GPIO VC`,
-      style: { text: `GPIO VC ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Set Zone ${zoneLetter} GPIO VC`,
+      style: { text: `GPIO VC ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.GPIO_VC 0`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.GPIO_VC 0`, value: '' } }],
           up: []
         }
       ],
@@ -163,12 +179,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Enable Zone ${zone} Mute`,
-      style: { text: `Mute Enable ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Enable Zone ${zoneLetter} Mute`,
+      style: { text: `Mute Enable ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.MUTE_ENABLE 1`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.MUTE_ENABLE 1`, value: '' } }],
           up: []
         }
       ],
@@ -176,12 +192,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Enable Zone ${zone} Source 100`,
-      style: { text: `Src 100 En ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Enable Zone ${zoneLetter} Source MIC1`,
+      style: { text: `Src MIC1 En ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.SRC-100.ENABLED 1`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.SRC-MIC1.ENABLED 1`, value: '' } }],
           up: []
         }
       ],
@@ -189,12 +205,12 @@ module.exports = (self) => {
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone}`,
-      name: `Get Zone ${zone} Signal`,
-      style: { text: `Get Signal ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter}`,
+      name: `Get Zone ${zoneLetter} Signal`,
+      style: { text: `Get Signal ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `GET ZONE-${zone}.DYN.SIGNAL`, value: '' } }],
+          down: [{ actionId: 'sendCommand', options: { command: `GET ${zone}.DYN.SIGNAL`, value: '' } }],
           up: []
         }
       ],

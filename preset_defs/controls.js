@@ -57,4 +57,27 @@ module.exports = (self) => [
       },
     ],
   },
+  {
+    type: 'button',
+    category: 'System',
+    name: 'Factory Reset',
+    style: {
+      text: 'Factory Reset',
+      size: '14',
+      color: combineRgb(255, 255, 255),
+      bgcolor: combineRgb(139, 0, 0),
+    },
+    steps: [
+      {
+        down: [
+          {
+            actionId: 'sendCommand',
+            options: { command: 'FACTORY_RESET', value: '' },
+          },
+        ],
+        up: [],
+      },
+    ],
+    feedbacks: [],
+  },
 ];
