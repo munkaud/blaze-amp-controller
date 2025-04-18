@@ -2,7 +2,7 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = (self) => {
   const presets = [];
-  const outputs = ['OUT-1', 'OUT-2', 'OUT-3', 'OUT-4']; // Match 1004’s 4 outputs
+  const outputs = self.state.outputs.length ? self.state.outputs : ['OUT-1', 'OUT-2', 'OUT-3', 'OUT-4'];
 
   // Power Presets
   presets.push({

@@ -6,7 +6,7 @@ module.exports = (self) => ({
         type: 'textinput',
         label: 'Command',
         id: 'command',
-        default: 'GET CONFIG',
+        default: '',
       },
       {
         type: 'textinput',
@@ -15,11 +15,14 @@ module.exports = (self) => ({
         default: '',
       },
     ],
-    callback: async (action) => {
-      const cmd = `${action.options.command} ${action.options.value}`.trim();
-      self.log('debug', `Sending: ${cmd}`);
-      if (self.socket) {
-        self.socket.send(cmd + '\n');
+    callback: async (event) => {
+      const { command, value } = event.options;
+      if (command && self.socket) {
+        const cmd = value ? `${command} ${value}\n` : `${command}\n`;
+        self.log('debug', `Sending: ${cmd.trim()}`);
+        self.socket.send(cmd);
+      } else {
+        self.log('error', 'Invalid command or no socket');
       }
     },
   },

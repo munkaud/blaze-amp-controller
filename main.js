@@ -35,7 +35,6 @@ class BlazeAmpInstance extends InstanceBase {
 
     this.updateActions();
     this.updateFeedbacks();
-    this.updatePresets();
     this.initTCP();
   }
 
@@ -92,6 +91,7 @@ class BlazeAmpInstance extends InstanceBase {
       ...zone_linking(this),
       ...dante(this),
     ];
+    this.log('debug', `Updating presets with zones: ${JSON.stringify(this.state.zones)}, zoneLinks: ${JSON.stringify(this.state.zoneLinks)}`);
     this.setPresetDefinitions(presets);
   }
 
@@ -103,6 +103,8 @@ class BlazeAmpInstance extends InstanceBase {
 
     if (this.config.host && this.config.port) {
       this.socket = new TCPHelper(this.config.host, this.config.port);
+      let expectedResponses = 0;
+      let receivedResponses = 0;
 
       this.socket.on('connect', () => {
         this.updateStatus('ok');
@@ -113,6 +115,9 @@ class BlazeAmpInstance extends InstanceBase {
           this.socket.send('GET SYSTEM.STATUS.SIGNAL_IN\n');
           this.socket.send('GET SYSTEM.STATUS.SIGNAL_OUT\n');
           this.socket.send('GET ZONE.COUNT\n');
+          this.socket.send('GET IN.COUNT\n');
+          this.socket.send('GET OUT.COUNT\n');
+          expectedResponses = 7; // API_VERSION, MODEL_NAME, SIGNAL_IN, SIGNAL_OUT, ZONE.COUNT, IN.COUNT, OUT.COUNT
         }, 1000);
       });
 
@@ -124,6 +129,8 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('data', (data) => {
         const msg = data.toString('utf8').trim();
         this.log('debug', `Received: ${msg}`);
+        receivedResponses++;
+
         if (msg.includes('ZONE') && !msg.includes('ZONE.COUNT') && !msg.includes('STEREO')) {
           this.setVariableValues({ [`zone_status`]: msg });
         }
@@ -139,11 +146,19 @@ class BlazeAmpInstance extends InstanceBase {
         if (msg.includes('ZONE.COUNT')) {
           const count = parseInt(msg.split('"')[1]) || 4;
           this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
-          // Query STEREO for primary zones (odd-numbered: A, C, E, G) within ZONE.COUNT
           const primaryZones = this.state.zones.filter((_, i) => i % 2 === 0);
           primaryZones.forEach((zone) => {
             this.socket.send(`GET ${zone}.STEREO\n`);
+            expectedResponses++;
           });
+        }
+        if (msg.includes('IN.COUNT')) {
+          const count = parseInt(msg.split('"')[1]) || 4;
+          this.state.inputs = Array.from({ length: count }, (_, i) => `IN-${100 + i}`);
+        }
+        if (msg.includes('OUT.COUNT')) {
+          const count = parseInt(msg.split('"')[1]) || 4;
+          this.state.outputs = Array.from({ length: count }, (_, i) => `OUT-${1 + i}`);
         }
         if (msg.includes('.STEREO')) {
           const [, zone, value] = msg.split(' ');
@@ -157,13 +172,30 @@ class BlazeAmpInstance extends InstanceBase {
         }
         if (msg.includes('SYSTEM.STATUS.SIGNAL_IN')) {
           const inputs = msg.split('"')[1]?.split(',') || [];
-          this.state.inputs = inputs;
+          if (!this.state.inputs.length) {
+            this.state.inputs = inputs;
+          }
         }
         if (msg.includes('SYSTEM.STATUS.SIGNAL_OUT')) {
           const outputs = msg.split('"')[1]?.split(',') || [];
-          this.state.outputs = outputs;
+          if (!this.state.outputs.length) {
+            this.state.outputs = outputs;
+          }
+        }
+
+        // Trigger presets update after all expected responses
+        if (receivedResponses >= expectedResponses) {
+          this.updatePresets();
         }
       });
+
+      // Timeout to prevent hanging
+      setTimeout(() => {
+        if (receivedResponses < expectedResponses) {
+          this.log('warn', 'Timeout waiting for responses, proceeding with presets');
+          this.updatePresets();
+        }
+      }, 5000);
     } else {
       this.updateStatus('bad_config');
       this.log('error', 'Configuration incomplete');
