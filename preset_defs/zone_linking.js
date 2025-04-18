@@ -6,8 +6,8 @@ module.exports = (self) => {
   const primaryZones = ['ZONE-A', 'ZONE-C']; // Only A, C can be primary per API 5.2.6.8
 
   primaryZones.forEach((zone) => {
-    if (self.state.zoneLinks[zone] || self.state.zoneStereo[zone]) return;
-
+    if (self.state.zoneLinks[zone]) return;
+    
     const zoneLetter = zone.split('-')[1];
     presets.push({
       type: 'button',

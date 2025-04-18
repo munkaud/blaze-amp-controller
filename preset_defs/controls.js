@@ -59,20 +59,43 @@ module.exports = (self) => [
   },
   {
     type: 'button',
-    category: 'System',
-    name: 'Factory Reset',
+    category: 'Power',
+    name: 'Standby On',
     style: {
-      text: 'Factory Reset (Double-Click)',
+      text: 'Standby ON',
       size: '14',
       color: combineRgb(255, 255, 255),
-      bgcolor: combineRgb(139, 0, 0),
+      bgcolor: combineRgb(0, 0, 0),
     },
     steps: [
       {
         down: [
           {
             actionId: 'sendCommand',
-            options: { command: 'SYSTEM.FACTORY_RESET', value: '' },
+            options: { command: 'STANDBY_ON', value: '' },
+          },
+        ],
+        up: [],
+      },
+    ],
+    feedbacks: [],
+  },
+  {
+    type: 'button',
+    category: 'Power',
+    name: 'Standby Off',
+    style: {
+      text: 'Standby OFF',
+      size: '14',
+      color: combineRgb(255, 255, 255),
+      bgcolor: combineRgb(0, 0, 0),
+    },
+    steps: [
+      {
+        down: [
+          {
+            actionId: 'sendCommand',
+            options: { command: 'STANDBY_OFF', value: '' },
           },
         ],
         up: [],
