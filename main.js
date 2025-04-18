@@ -19,7 +19,7 @@ try {
         this.socket = null;
         this.responseBuffer = '';
         this.config = { ...configParser.getDefaultConfig(), ...this.config };
-        setupActions.setup(this);
+        setupActions.setup(this); // Moved before setupPresets
         this.setupFeedback();
         this.connectToAmp();
         this.setupPresets();
@@ -76,8 +76,11 @@ try {
         return;
       }
 
-      this.setPresetDefinitions(validatedPresets);
-      console.log(`Presets registered with setPresetDefinitions: ${Object.keys(validatedPresets).length} presets`);
+      // Add slight delay to ensure UI is ready
+      setTimeout(() => {
+        this.setPresetDefinitions(validatedPresets);
+        console.log(`Presets registered with setPresetDefinitions: ${Object.keys(validatedPresets).length} presets`);
+      }, 1000);
     }
 
     connectToAmp() {
