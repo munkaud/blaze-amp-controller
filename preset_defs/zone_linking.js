@@ -9,6 +9,7 @@ module.exports = (self) => {
     if (self.state.zoneLinks[zone] || index % 2 !== 0) return;
 
     const zoneLetter = zone.split('-')[1];
+    self.log('debug', `Generating Zone ${zoneLetter} Linking presets`);
     presets.push({
       type: 'button',
       category: `Zone ${zoneLetter} Linking`,
