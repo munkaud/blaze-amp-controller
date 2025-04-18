@@ -13,7 +13,7 @@ module.exports = (self) => {
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(0, 0, 0)
       },
-      actions: [{ action: 'getConfig', options: {}, instance: 'blaze-amps' }]
+      actions: [{ actionId: 'getConfig', options: {}, instance: 'blaze-amps' }]
     },
     {
       category: 'Debug',
@@ -25,7 +25,7 @@ module.exports = (self) => {
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(0, 0, 0)
       },
-      actions: [{ action: 'sendCommand', options: { command: 'SET ZONE-A.DUCK.AUTO 1', value: '' }, instance: 'blaze-amps' }]
+      actions: [{ actionId: 'sendCommand', options: { command: 'SET ZONE-A.DUCK.AUTO 1', value: '' }, instance: 'blaze-amps' }]
     }
   ];
 };

@@ -19,10 +19,14 @@ try {
         this.socket = null;
         this.responseBuffer = '';
         this.config = { ...configParser.getDefaultConfig(), ...this.config };
-        setupActions.setup(this);
+        this.updateStatus(InstanceStatus.Connecting);
+        const actionDefs = setupActions.getActions(this);
+        this.setActionDefinitions(actionDefs);
+        console.log('Action definitions set completed');
         this.setupFeedback();
         this.connectToAmp();
         this.setupPresets();
+        console.log('Presets set completed');
         this.updateStatus(InstanceStatus.Ok);
       } catch (err) {
         console.error(`Init error: ${err.message}`);
@@ -49,11 +53,10 @@ try {
     setupPresets() {
       console.log('Setting up presets');
       const debugPresetsFn = require('./preset_defs/debug');
-      const debugPresetsArray = debugPresetsFn(this); // Get array
+      const debugPresetsArray = debugPresetsFn(this);
       console.log('Debug presets array:', JSON.stringify(debugPresetsArray, null, 2));
       console.log('Instance context:', this.config);
 
-      // Convert array to object
       const debugPresets = debugPresetsArray.reduce((acc, preset, i) => {
         const id = i === 0 ? 'preset_init' : 'preset_send_cmd';
         return { ...acc, [id]: preset };
@@ -61,7 +64,6 @@ try {
 
       console.log('Debug presets object:', JSON.stringify(debugPresets, null, 2));
 
-      // Validate presets
       const validatedPresets = {};
       for (const [id, preset] of Object.entries(debugPresets)) {
         if (!preset.category || !preset.label || !preset.bank || !preset.actions) {
@@ -86,7 +88,6 @@ try {
         return;
       }
 
-      // Add slight delay to ensure UI is ready
       setTimeout(() => {
         this.setPresetDefinitions(validatedPresets);
         console.log(`Presets registered with setPresetDefinitions: ${Object.keys(validatedPresets).length} presets`);
@@ -155,7 +156,7 @@ try {
             const state = this.getVariable('power_state') || 'OFF';
             return {
               text: state === 'ON' ? '✓ ON' : 'OFF',
-              bgcolor: state === 'ON' ? 0x00FF00 : 0xFF0000 // Forest green, deep red
+              bgcolor: state === 'ON' ? 0x00FF00 : 0xFF0000
             };
           }
         },
