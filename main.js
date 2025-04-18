@@ -11,6 +11,7 @@ const zone_compress = require('./preset_defs/zone_compress');
 const subscriptions = require('./preset_defs/subscriptions');
 const controls = require('./preset_defs/controls');
 const zone_linking = require('./preset_defs/zone_linking');
+const dante = require('./preset_defs/dante');
 
 class BlazeAmpInstance extends InstanceBase {
   constructor(internal) {
@@ -88,6 +89,7 @@ class BlazeAmpInstance extends InstanceBase {
       ...subscriptions(this),
       ...controls(this),
       ...zone_linking(this),
+      ...dante(this),
     ];
     this.setPresetDefinitions(presets);
   }
