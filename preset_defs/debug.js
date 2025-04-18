@@ -4,28 +4,40 @@ module.exports = (self) => {
   console.log('Debug presets accessed with instance config:', self.config);
   return [
     {
+      type: 'button',
       category: 'Setup',
-      label: 'Initialize',
-      bank: {
-        style: 'text',
+      name: 'Initialize',
+      style: {
         text: 'Init',
         size: '14',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(0, 0, 0)
       },
-      actions: [{ action: 'getConfig', options: {}, instance: 'blaze-amps' }]
+      steps: [
+        {
+          down: [{ actionId: 'getConfig', options: {} }],
+          up: []
+        }
+      ],
+      feedbacks: []
     },
     {
+      type: 'button',
       category: 'Debug',
-      label: 'Send Raw Command',
-      bank: {
-        style: 'text',
+      name: 'Send Raw Command',
+      style: {
         text: 'Send Cmd',
         size: '14',
         color: combineRgb(255, 255, 255),
         bgcolor: combineRgb(0, 0, 0)
       },
-      actions: [{ action: 'sendCommand', options: { command: 'SET ZONE-A.DUCK.AUTO 1', value: '' }, instance: 'blaze-amps' }]
+      steps: [
+        {
+          down: [{ actionId: 'sendCommand', options: { command: 'SET ZONE-A.DUCK.AUTO 1', value: '' } }],
+          up: []
+        }
+      ],
+      feedbacks: []
     }
   ];
 };

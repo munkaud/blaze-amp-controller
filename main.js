@@ -58,7 +58,7 @@ try {
       console.log('Instance context:', this.config);
 
       const debugPresets = debugPresetsArray.reduce((acc, preset, i) => {
-        const id = i === 0 ? 'preset_init' : 'preset_send_cmd';
+        const id = i === 0 ? 'getConfig' : 'sendCommand';
         return { ...acc, [id]: preset };
       }, {});
 
@@ -66,18 +66,24 @@ try {
 
       const validatedPresets = {};
       for (const [id, preset] of Object.entries(debugPresets)) {
-        if (!preset.category || !preset.label || !preset.bank || !preset.actions) {
+        if (!preset.category || !preset.name || !preset.style || !preset.steps) {
           console.error(`Invalid preset ${id}: Missing required fields`);
           continue;
         }
-        if (!Array.isArray(preset.actions) || preset.actions.length === 0) {
-          console.error(`Invalid preset ${id}: Actions must be a non-empty array`);
+        if (!Array.isArray(preset.steps) || preset.steps.length === 0) {
+          console.error(`Invalid preset ${id}: Steps must be a non-empty array`);
           continue;
         }
-        for (const action of preset.actions) {
-          if (!(action.action || action.actionId) || !action.options) {
-            console.error(`Invalid preset ${id}: Action missing action/actionId or options`);
+        for (const step of preset.steps) {
+          if (!step.down || !Array.isArray(step.down)) {
+            console.error(`Invalid preset ${id}: Step missing down array`);
             continue;
+          }
+          for (const action of step.down) {
+            if (!(action.actionId || action.action) || !action.options) {
+              console.error(`Invalid preset ${id}: Action missing actionId/action or options`);
+              continue;
+            }
           }
         }
         validatedPresets[id] = preset;
