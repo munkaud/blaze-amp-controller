@@ -62,7 +62,7 @@ module.exports = (self) => [
     category: 'System',
     name: 'Factory Reset',
     style: {
-      text: 'Factory Reset',
+      text: 'Factory Reset (Double-Click)',
       size: '14',
       color: combineRgb(255, 255, 255),
       bgcolor: combineRgb(139, 0, 0),
