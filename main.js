@@ -1,4 +1,4 @@
-const { InstanceBase, runEntrypoint } = require('@companion-module/base');
+const { InstanceBase, runEntrypoint, TCPHelper } = require('@companion-module/base');
 const actions = require('./actions');
 const debug = require('./preset_defs/debug');
 const digitals = require('./preset_defs/digitals');
@@ -8,7 +8,6 @@ const zone_settings = require('./preset_defs/zone_settings');
 const zone_duck = require('./preset_defs/zone_duck');
 const zone_compress = require('./preset_defs/zone_compress');
 const subscriptions = require('./preset_defs/subscriptions');
-// Add controls.js if it exists
 const controls = require('./preset_defs/controls');
 
 class BlazeAmpInstance extends InstanceBase {
@@ -77,10 +76,8 @@ class BlazeAmpInstance extends InstanceBase {
       ...zone_duck(this),
       ...zone_compress(this),
       ...subscriptions(this),
+      ...controls(this),
     ];
-    if (controls) {
-      presets.push(...controls(this));
-    }
     this.setPresetDefinitions(presets);
   }
 
@@ -91,7 +88,7 @@ class BlazeAmpInstance extends InstanceBase {
     }
 
     if (this.config.host && this.config.port) {
-      this.socket = new this.TCP(this.config.host, this.config.port);
+      this.socket = new TCPHelper(this.config.host, this.config.port);
 
       this.socket.on('connect', () => {
         this.updateStatus('ok');
@@ -106,7 +103,6 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('data', (data) => {
         const msg = data.toString('utf8').trim();
         this.log('debug', `Received: ${msg}`);
-        // Handle responses, update state if needed
         if (msg.includes('ZONE')) {
           this.setVariableValues({ [`zone_status`]: msg });
         }
