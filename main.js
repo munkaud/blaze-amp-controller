@@ -24,8 +24,10 @@ class BlazeAmpInstance extends InstanceBase {
       inputGains: {},
       stereoPairs: {},
       generatorGain: 0,
-      zones: ['ZONE-A', 'ZONE-B', 'ZONE-C'], // Default, to be updated
+      zones: [], // Initialize empty, populate dynamically
       zoneLinks: {},
+      inputs: [],
+      outputs: [],
       power: 'OFF',
     };
 
@@ -102,8 +104,10 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('connect', () => {
         this.updateStatus('ok');
         this.log('info', 'Connected to Blaze Amp');
-        // Poll zone configuration
+        // Poll configuration
         this.socket.send('GET CONFIG\n');
+        this.socket.send('GET SYSTEM.INPUTS\n');
+        this.socket.send('GET SYSTEM.OUTPUTS\n');
       });
 
       this.socket.on('error', (err) => {
@@ -123,11 +127,9 @@ class BlazeAmpInstance extends InstanceBase {
           this.checkFeedbacks('power_state');
         }
         if (msg.includes('CONFIG')) {
-          // Parse CONFIG response (simplified example)
-          const zoneCount = msg.includes('ZONE-D') ? 4 : 3; // Adjust based on amp model
-          this.state.zones = ['ZONE-A', 'ZONE-B', 'ZONE-C'];
-          if (zoneCount === 4) this.state.zones.push('ZONE-D');
-          // Poll zone links
+          // Parse CONFIG for zones (example, adjust based on actual response)
+          const zoneMatches = msg.match(/ZONE-[A-H]/g) || [];
+          this.state.zones = [...new Set(zoneMatches)];
           this.state.zones.forEach((zone) => {
             this.socket.send(`GET ${zone}.LINK\n`);
           });
@@ -135,6 +137,16 @@ class BlazeAmpInstance extends InstanceBase {
         if (msg.includes('.LINK')) {
           const [zone, link] = msg.split(' ');
           this.state.zoneLinks[zone] = link || null;
+        }
+        if (msg.includes('SYSTEM.INPUTS')) {
+          // Example: +SYSTEM.INPUTS "MIC1,LINE1,MIX1"
+          const inputs = msg.split('"')[1]?.split(',') || [];
+          this.state.inputs = inputs;
+        }
+        if (msg.includes('SYSTEM.OUTPUTS')) {
+          // Example: +SYSTEM.OUTPUTS "OUT1,OUT2,OUT3,OUT4"
+          const outputs = msg.split('"')[1]?.split(',') || [];
+          this.state.outputs = outputs;
         }
       });
     } else {
