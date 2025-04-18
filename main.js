@@ -1,5 +1,6 @@
 const { InstanceBase, runEntrypoint, TCPHelper } = require('@companion-module/base');
 const actions = require('./actions');
+const feedbacks = require('./feedbacks');
 const debug = require('./preset_defs/debug');
 const digitals = require('./preset_defs/digitals');
 const inputs = require('./preset_defs/inputs');
@@ -24,9 +25,11 @@ class BlazeAmpInstance extends InstanceBase {
       generatorGain: 0,
       zones: 3,
       zoneLinks: {},
+      power: 'OFF', // Initialize power state
     };
 
     this.updateActions();
+    this.updateFeedbacks();
     this.updatePresets();
     this.initTCP();
   }
@@ -64,6 +67,10 @@ class BlazeAmpInstance extends InstanceBase {
 
   updateActions() {
     this.setActionDefinitions(actions(this));
+  }
+
+  updateFeedbacks() {
+    this.setFeedbackDefinitions(feedbacks(this));
   }
 
   updatePresets() {
@@ -105,6 +112,11 @@ class BlazeAmpInstance extends InstanceBase {
         this.log('debug', `Received: ${msg}`);
         if (msg.includes('ZONE')) {
           this.setVariableValues({ [`zone_status`]: msg });
+        }
+        if (msg.includes('SYSTEM.STATUS.POWER')) {
+          const powerState = msg.includes('ON') ? 'ON' : 'OFF';
+          this.state.power = powerState;
+          this.checkFeedbacks('power_state');
         }
       });
     } else {
