@@ -2,7 +2,7 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = (self) => {
   const presets = [];
-  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C'];
+  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D', 'ZONE-E', 'ZONE-F', 'ZONE-G', 'ZONE-H'];
 
   zones.forEach((zone) => {
     // Skip if zone is a secondary link (e.g., ZONE-B linked to ZONE-A)
