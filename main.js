@@ -103,8 +103,9 @@ class BlazeAmpInstance extends InstanceBase {
 
     if (this.config.host && this.config.port) {
       this.socket = new TCPHelper(this.config.host, this.config.port);
-      let expectedResponses = 0;
+      let expectedResponses = 7; // API_VERSION, MODEL_NAME, SIGNAL_IN, SIGNAL_OUT, ZONE.COUNT, IN.COUNT, OUT.COUNT
       let receivedResponses = 0;
+      let stereoQueriesSent = 0;
 
       this.socket.on('connect', () => {
         this.updateStatus('ok');
@@ -117,7 +118,6 @@ class BlazeAmpInstance extends InstanceBase {
           this.socket.send('GET ZONE.COUNT\n');
           this.socket.send('GET IN.COUNT\n');
           this.socket.send('GET OUT.COUNT\n');
-          expectedResponses = 7; // API_VERSION, MODEL_NAME, SIGNAL_IN, SIGNAL_OUT, ZONE.COUNT, IN.COUNT, OUT.COUNT
         }, 1000);
       });
 
@@ -147,9 +147,10 @@ class BlazeAmpInstance extends InstanceBase {
           const count = parseInt(msg.split('"')[1]) || 4;
           this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
           const primaryZones = this.state.zones.filter((_, i) => i % 2 === 0);
+          stereoQueriesSent = primaryZones.length;
+          expectedResponses += stereoQueriesSent;
           primaryZones.forEach((zone) => {
             this.socket.send(`GET ${zone}.STEREO\n`);
-            expectedResponses++;
           });
         }
         if (msg.includes('IN.COUNT')) {
@@ -168,6 +169,7 @@ class BlazeAmpInstance extends InstanceBase {
             const secondaryZone = this.state.zones[zoneIndex + 1];
             this.state.zoneLinks[secondaryZone] = value === '1' ? zone : null;
             this.state.zoneStereo[secondaryZone] = 0;
+            this.log('debug', `Set zoneLinks: ${JSON.stringify(this.state.zoneLinks)}`);
           }
         }
         if (msg.includes('SYSTEM.STATUS.SIGNAL_IN')) {
@@ -185,6 +187,7 @@ class BlazeAmpInstance extends InstanceBase {
 
         // Trigger presets update after all expected responses
         if (receivedResponses >= expectedResponses) {
+          this.log('debug', `All responses received, updating presets`);
           this.updatePresets();
         }
       });
