@@ -6,8 +6,8 @@ module.exports = (self) => {
   const danteChannels = ['DANTE1', 'DANTE2', 'DANTE3', 'DANTE4']; // Adjust based on model
 
   zones.forEach((zone) => {
-    if (self.state.zoneLinks[zone]) return;
-
+    if (self.state.zoneLinks[zone] || self.state.zoneStereo[zone]) return;
+    
     const zoneLetter = zone.split('-')[1];
     danteChannels.forEach((channel) => {
       presets.push({

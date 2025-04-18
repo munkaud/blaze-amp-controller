@@ -5,8 +5,8 @@ module.exports = (self) => {
   const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D', 'ZONE-E', 'ZONE-F', 'ZONE-G', 'ZONE-H'];
 
   zones.forEach((zone) => {
-    if (self.state.zoneLinks[zone]) return;
-
+    if (self.state.zoneLinks[zone] || self.state.zoneStereo[zone]) return;
+    
     const zoneLetter = zone.split('-')[1];
     presets.push({
       type: 'button',

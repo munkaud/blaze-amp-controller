@@ -4,9 +4,8 @@ module.exports = (self) => {
   const presets = [];
   const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C'];
 
-  zones.forEach((zone) => {
-    // Skip if zone is a secondary link (e.g., ZONE-B linked to ZONE-A)
-    if (self.state.zoneLinks[zone]) return;
+zones.forEach((zone) => {
+  if (self.state.zoneLinks[zone] || self.state.zoneStereo[zone]) return;
 
     const zoneLetter = zone.split('-')[1];
     presets.push({
