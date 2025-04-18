@@ -107,7 +107,6 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('connect', () => {
         this.updateStatus('ok');
         this.log('info', 'Connected to Blaze Amp');
-        // Initialize connection
         this.socket.send('GET API_VERSION\n');
         setTimeout(() => {
           this.socket.send('GET SYSTEM.DEVICE.MODEL_NAME\n');
@@ -136,31 +135,24 @@ class BlazeAmpInstance extends InstanceBase {
         if (msg.includes('SYSTEM.DEVICE.MODEL_NAME')) {
           const model = msg.split('"')[1] || 'Unknown';
           this.state.model = model;
-          ['ZONE-A', 'ZONE-C'].forEach((zone) => {
-            if (this.state.zones.includes(zone)) {
-              this.socket.send(`GET ${zone}.STEREO\n`);
-            }
-          });
         }
         if (msg.includes('ZONE.COUNT')) {
           const count = parseInt(msg.split('"')[1]) || 4;
           this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
-          ['ZONE-A', 'ZONE-C'].forEach((zone) => {
-            if (this.state.zones.includes(zone)) {
-              this.socket.send(`GET ${zone}.STEREO\n`);
-            }
+          // Query STEREO for primary zones (odd-numbered: A, C, E, G) within ZONE.COUNT
+          const primaryZones = this.state.zones.filter((_, i) => i % 2 === 0);
+          primaryZones.forEach((zone) => {
+            this.socket.send(`GET ${zone}.STEREO\n`);
           });
         }
         if (msg.includes('.STEREO')) {
           const [, zone, value] = msg.split(' ');
           this.state.zoneStereo[zone] = parseInt(value) || 0;
-          if (zone === 'ZONE-A') {
-            this.state.zoneLinks['ZONE-B'] = value === '1' ? 'ZONE-A' : null;
-            this.state.zoneStereo['ZONE-B'] = 0;
-          }
-          if (zone === 'ZONE-C') {
-            this.state.zoneLinks['ZONE-D'] = value === '1' ? 'ZONE-C' : null;
-            this.state.zoneStereo['ZONE-D'] = 0;
+          const zoneIndex = this.state.zones.indexOf(zone);
+          if (zoneIndex >= 0 && zoneIndex % 2 === 0 && zoneIndex + 1 < this.state.zones.length) {
+            const secondaryZone = this.state.zones[zoneIndex + 1];
+            this.state.zoneLinks[secondaryZone] = value === '1' ? zone : null;
+            this.state.zoneStereo[secondaryZone] = 0;
           }
         }
         if (msg.includes('SYSTEM.STATUS.SIGNAL_IN')) {

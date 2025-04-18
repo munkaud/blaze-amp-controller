@@ -1,66 +1,93 @@
-module.exports = function (instance) {
-  const presets = [];
-  const zoneMap = { 1: 'A', 2: 'B', 3: 'C', 4: 'D' };
+const { combineRgb } = require('@companion-module/base');
 
-  for (let zid = 1; zid <= instance.state.zones; zid++) {
-    const zoneLetter = zoneMap[zid];
-    const isSecondary = (zid === 2 && instance.state.zoneLinks[1] === 1) || (zid === 4 && instance.state.zoneLinks[3] === 1);
-    if (isSecondary) continue; // Skip secondary zones in stereo pairs
+module.exports = (self) => {
+  const presets = [];
+  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D', 'ZONE-E', 'ZONE-F', 'ZONE-G', 'ZONE-H'];
+
+  zones.forEach((zone) => {
+    if (self.state.zoneLinks[zone]) return; // Skip secondary zones
+
+    const zoneLetter = zone.split('-')[1];
 
     // Zone Name Preset
     presets.push({
-      category: 'Zone Names',
-      label: `Zone ${zoneLetter} Name`,
-      bank: {
-        style: 'text',
-        text: `$(blaze-amp-controller:zone_name_${zid})`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Settings`,
+      name: `Zone ${zoneLetter} Name`,
+      style: {
+        text: `Zone ${zoneLetter} Name`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.NAME`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Gain Preset
     presets.push({
-      category: 'Zone Gains',
-      label: `Zone ${zoneLetter} Gain`,
-      bank: {
-        style: 'text',
-        text: `$(blaze-amp-controller:zone_gain_${zid}) dB`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Settings`,
+      name: `Zone ${zoneLetter} Gain`,
+      style: {
+        text: `Zone ${zoneLetter} Gain`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.GAIN`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Mute Preset
     presets.push({
-      category: 'Zone Mutes',
-      label: `Zone ${zoneLetter} Mute`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Mute: $(blaze-amp-controller:zone_mute_${zid})`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Settings`,
+      name: `Zone ${zoneLetter} Mute`,
+      style: {
+        text: `Zone ${zoneLetter} Mute`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [
+      steps: [
         {
-          action: 'setZoneMute',
-          options: { zoneId: zoneLetter, value: '1' },
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `SET ${zone}.MUTE 1`, value: '' },
+            },
+          ],
+          up: [],
         },
       ],
       feedbacks: [
         {
-          type: 'zone_mute',
-          options: { zoneId: zid },
+          feedbackId: 'zone_mute',
+          options: { zoneId: zone },
           style: {
-            bgcolor: 0xFF0000, // Red
-            color: 0xFFFFFF, // White
+            bgcolor: combineRgb(255, 0, 0),
+            color: combineRgb(255, 255, 255),
           },
         },
       ],
@@ -68,169 +95,279 @@ module.exports = function (instance) {
 
     // Zone Primary Source Preset
     presets.push({
-      category: 'Zone Sources',
-      label: `Zone ${zoneLetter} Primary Source`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Primary: $(blaze-amp-controller:zone_primary_src_${zid})`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Settings`,
+      name: `Zone ${zoneLetter} Primary Source`,
+      style: {
+        text: `Zone ${zoneLetter} Primary Source`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.PRIMARY_SRC`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Priority Source Preset
     presets.push({
-      category: 'Zone Sources',
-      label: `Zone ${zoneLetter} Priority Source`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Priority: $(blaze-amp-controller:zone_priority_src_${zid})`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Settings`,
+      name: `Zone ${zoneLetter} Priority Source`,
+      style: {
+        text: `Zone ${zoneLetter} Priority Source`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.PRIORITY_SRC`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Mode Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Mode`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Ducker Mode: $(blaze-amp-controller:zone_ducker_mode_${zid})`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Mode`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Mode`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.MODE`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Auto Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Auto`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Ducker Auto: $(blaze-amp-controller:zone_ducker_auto_${zid})`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Auto`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Auto`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.AUTO`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Threshold Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Threshold`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Threshold: $(blaze-amp-controller:zone_ducker_threshold_${zid}) dB`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Threshold`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Threshold`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.THRESHOLD`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Depth Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Depth`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Depth: $(blaze-amp-controller:zone_ducker_depth_${zid}) dB`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Depth`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Depth`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.DEPTH`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Attack Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Attack`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Attack: $(blaze-amp-controller:zone_ducker_attack_${zid}) s`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Attack`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Attack`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.ATTACK`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Release Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Release`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Release: $(blaze-amp-controller:zone_ducker_release_${zid}) s`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Release`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Release`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.RELEASE`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Hold Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Hold`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Hold: $(blaze-amp-controller:zone_ducker_hold_${zid}) s`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Hold`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Hold`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.HOLD`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Override Gain Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Override Gain`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Override Gain: $(blaze-amp-controller:zone_ducker_override_gain_${zid}) dB`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Override Gain`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Override Gain`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.OVERRIDE_GAIN`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
 
     // Zone Ducker Override Gain Enable Preset
     presets.push({
-      category: 'Zone Ducker',
-      label: `Zone ${zoneLetter} Ducker Override Gain Enable`,
-      bank: {
-        style: 'text',
-        text: `Zone ${zoneLetter} Override Gain Enable: $(blaze-amp-controller:zone_ducker_override_gain_enable_${zid})`,
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducker`,
+      name: `Zone ${zoneLetter} Ducker Override Gain Enable`,
+      style: {
+        text: `Zone ${zoneLetter} Ducker Override Gain Enable`,
         size: '14',
-        color: 0xFFFFFF, // White
-        bgcolor: 0x000000, // Black
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
       },
-      actions: [],
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.DUCKER.OVERRIDE_GAIN_ENABLE`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
       feedbacks: [],
     });
-  }
+  });
 
   return presets;
 };
