@@ -19,7 +19,7 @@ try {
         this.socket = null;
         this.responseBuffer = '';
         this.config = { ...configParser.getDefaultConfig(), ...this.config };
-        setupActions.setup(this); // Moved before setupPresets
+        setupActions.setup(this);
         this.setupFeedback();
         this.connectToAmp();
         this.setupPresets();
@@ -48,8 +48,9 @@ try {
 
     setupPresets() {
       console.log('Setting up presets');
-      const debugPresets = require('./preset_defs/debug');
+      const debugPresets = require('./preset_defs/debug')(this); // Call with instance
       console.log('Debug presets loaded:', JSON.stringify(debugPresets, null, 2));
+      console.log('Instance context:', this.config);
 
       // Validate presets
       const validatedPresets = {};
