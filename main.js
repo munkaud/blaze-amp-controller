@@ -48,9 +48,18 @@ try {
 
     setupPresets() {
       console.log('Setting up presets');
-      const debugPresets = require('./preset_defs/debug')(this); // Call with instance
-      console.log('Debug presets loaded:', JSON.stringify(debugPresets, null, 2));
+      const debugPresetsFn = require('./preset_defs/debug');
+      const debugPresetsArray = debugPresetsFn(this); // Get array
+      console.log('Debug presets array:', JSON.stringify(debugPresetsArray, null, 2));
       console.log('Instance context:', this.config);
+
+      // Convert array to object
+      const debugPresets = debugPresetsArray.reduce((acc, preset, i) => {
+        const id = i === 0 ? 'preset_init' : 'preset_send_cmd';
+        return { ...acc, [id]: preset };
+      }, {});
+
+      console.log('Debug presets object:', JSON.stringify(debugPresets, null, 2));
 
       // Validate presets
       const validatedPresets = {};
