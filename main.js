@@ -110,11 +110,11 @@ class BlazeAmpInstance extends InstanceBase {
         // Initialize connection
         this.socket.send('GET API_VERSION\n');
         setTimeout(() => {
-          this.socket.send('GET CONFIG\n');
-          this.socket.send('GET SYSTEM.INPUTS\n');
-          this.socket.send('GET SYSTEM.OUTPUTS\n');
+          this.socket.send('GET SYSTEM.DEVICE.MODEL_NAME\n');
+          this.socket.send('GET SYSTEM.STATUS.SIGNAL_IN\n');
+          this.socket.send('GET SYSTEM.STATUS.SIGNAL_OUT\n');
           this.socket.send('GET ZONE.COUNT\n');
-        }, 1000); // 1s delay
+        }, 1000);
       });
 
       this.socket.on('error', (err) => {
@@ -133,47 +133,41 @@ class BlazeAmpInstance extends InstanceBase {
           this.state.power = powerState;
           this.checkFeedbacks('power_state');
         }
-        if (msg.includes('CONFIG')) {
-          const zoneMatches = msg.match(/ZONE-[A-H]/g) || [];
-          this.state.zones = [...new Set(zoneMatches)];
-          if (!this.state.zones.length) {
-            this.socket.send('GET ZONE.COUNT\n');
-          } else {
-            this.state.zones.forEach((zone) => {
+        if (msg.includes('SYSTEM.DEVICE.MODEL_NAME')) {
+          const model = msg.split('"')[1] || 'Unknown';
+          this.state.model = model;
+          ['ZONE-A', 'ZONE-C'].forEach((zone) => {
+            if (this.state.zones.includes(zone)) {
               this.socket.send(`GET ${zone}.STEREO\n`);
-            });
-          }
+            }
+          });
         }
         if (msg.includes('ZONE.COUNT')) {
           const count = parseInt(msg.split('"')[1]) || 4;
           this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
-          this.state.zones.forEach((zone) => {
-            this.socket.send(`GET ${zone}.STEREO\n`);
+          ['ZONE-A', 'ZONE-C'].forEach((zone) => {
+            if (this.state.zones.includes(zone)) {
+              this.socket.send(`GET ${zone}.STEREO\n`);
+            }
           });
         }
         if (msg.includes('.STEREO')) {
           const [, zone, value] = msg.split(' ');
           this.state.zoneStereo[zone] = parseInt(value) || 0;
-          // If primary zone (A, C) has STEREO 1, mark secondary (B, D) as linked
-          if (zone === 'ZONE-A' && value === '1') this.state.zoneLinks['ZONE-B'] = 'ZONE-A';
-          if (zone === 'ZONE-C' && value === '1') this.state.zoneLinks['ZONE-D'] = 'ZONE-C';
-        }
-        if (msg.includes('GET ZONE') && msg.includes('Command Failed')) {
-          const zone = msg.match(/ZONE-[A-H]/)?.[0];
-          if (zone && ['ZONE-B', 'ZONE-D'].includes(zone)) {
-            // Assume secondary zone is linked to primary
-            this.state.zoneLinks[zone] = zone === 'ZONE-B' ? 'ZONE-A' : 'ZONE-C';
-            this.state.zoneStereo[zone] = 0; // Secondary zones don’t have STEREO
-          } else if (zone) {
-            this.state.zoneStereo[zone] = 0; // Primary zone, no stereo
-            this.state.zoneLinks[zone] = null;
+          if (zone === 'ZONE-A') {
+            this.state.zoneLinks['ZONE-B'] = value === '1' ? 'ZONE-A' : null;
+            this.state.zoneStereo['ZONE-B'] = 0;
+          }
+          if (zone === 'ZONE-C') {
+            this.state.zoneLinks['ZONE-D'] = value === '1' ? 'ZONE-C' : null;
+            this.state.zoneStereo['ZONE-D'] = 0;
           }
         }
-        if (msg.includes('SYSTEM.INPUTS')) {
+        if (msg.includes('SYSTEM.STATUS.SIGNAL_IN')) {
           const inputs = msg.split('"')[1]?.split(',') || [];
           this.state.inputs = inputs;
         }
-        if (msg.includes('SYSTEM.OUTPUTS')) {
+        if (msg.includes('SYSTEM.STATUS.SIGNAL_OUT')) {
           const outputs = msg.split('"')[1]?.split(',') || [];
           this.state.outputs = outputs;
         }

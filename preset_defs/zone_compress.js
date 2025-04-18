@@ -2,112 +2,103 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = (self) => {
   const presets = [];
-  const zones = ['A', 'B', 'C'];
+  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D', 'ZONE-E', 'ZONE-F', 'ZONE-G', 'ZONE-H'];
 
-  zones.forEach(zone => {
+  zones.forEach((zone) => {
+    if (self.state.zoneLinks[zone]) return;
+
+    const zoneLetter = zone.split('-')[1];
     presets.push({
       type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Enable Zone ${zone} Compressor Auto`,
-      style: { text: `Comp Auto ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter} Compression`,
+      name: `Enable Zone ${zoneLetter} Comp`,
+      style: {
+        text: `Enable ${zoneLetter} Comp`,
+        size: '14',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
+      },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.AUTO 1`, value: '' } }],
-          up: []
-        }
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `SET ${zone}.COMP.ENABLE 1`, value: '' },
+            },
+          ],
+          up: [],
+        },
       ],
-      feedbacks: []
+      feedbacks: [],
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Set Zone ${zone} Compressor Threshold`,
-      style: { text: `Comp Thresh ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter} Compression`,
+      name: `Disable Zone ${zoneLetter} Comp`,
+      style: {
+        text: `Disable ${zoneLetter} Comp`,
+        size: '14',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
+      },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.THRESHOLD -30`, value: '' } }],
-          up: []
-        }
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `SET ${zone}.COMP.ENABLE 0`, value: '' },
+            },
+          ],
+          up: [],
+        },
       ],
-      feedbacks: []
+      feedbacks: [],
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Set Zone ${zone} Compressor Attack`,
-      style: { text: `Comp Attack ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter} Compression`,
+      name: `Get Zone ${zoneLetter} Comp`,
+      style: {
+        text: `Get ${zoneLetter} Comp`,
+        size: '14',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
+      },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.ATTACK 0.1`, value: '' } }],
-          up: []
-        }
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `GET ${zone}.COMP.ENABLE`, value: '' },
+            },
+          ],
+          up: [],
+        },
       ],
-      feedbacks: []
+      feedbacks: [],
     });
     presets.push({
       type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Set Zone ${zone} Compressor Release`,
-      style: { text: `Comp Release ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      category: `Zone ${zoneLetter} Compression`,
+      name: `Set Zone ${zoneLetter} Threshold`,
+      style: {
+        text: `Set ${zoneLetter} Thresh`,
+        size: '14',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
+      },
       steps: [
         {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.RELEASE 1.0`, value: '' } }],
-          up: []
-        }
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `SET ${zone}.COMP.THRESHOLD -10`, value: '' },
+            },
+          ],
+          up: [],
+        },
       ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Set Zone ${zone} Compressor Ratio`,
-      style: { text: `Comp Ratio ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.RATIO 2.0`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Set Zone ${zone} Compressor Hold`,
-      style: { text: `Comp Hold ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.HOLD 0.5`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Set Zone ${zone} Compressor Knee`,
-      style: { text: `Comp Knee ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.KNEE 0`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zone} Compression`,
-      name: `Set Zone ${zone} Compressor Bypass`,
-      style: { text: `Comp Bypass ${zone}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ZONE-${zone}.COMPRESSOR.BYPASS 0`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
+      feedbacks: [],
     });
   });
 
