@@ -105,9 +105,10 @@ class BlazeAmpInstance extends InstanceBase {
         this.updateStatus('ok');
         this.log('info', 'Connected to Blaze Amp');
         // Poll configuration
-        this.socket.send('GET CONFIG\n');
-        this.socket.send('GET SYSTEM.INPUTS\n');
-        this.socket.send('GET SYSTEM.OUTPUTS\n');
+        this.socket.send('CONFIG\n');
+        this.socket.send('SYSTEM.INPUTS\n');
+        this.socket.send('SYSTEM.OUTPUTS\n');
+        this.socket.send('GET ZONE.COUNT\n');
       });
 
       this.socket.on('error', (err) => {
@@ -118,7 +119,7 @@ class BlazeAmpInstance extends InstanceBase {
       this.socket.on('data', (data) => {
         const msg = data.toString('utf8').trim();
         this.log('debug', `Received: ${msg}`);
-        if (msg.includes('ZONE')) {
+        if (msg.includes('ZONE') && !msg.includes('ZONE.COUNT')) {
           this.setVariableValues({ [`zone_status`]: msg });
         }
         if (msg.includes('SYSTEM.STATUS.POWER')) {
@@ -130,12 +131,24 @@ class BlazeAmpInstance extends InstanceBase {
           // Parse CONFIG for zones (example, adjust based on actual response)
           const zoneMatches = msg.match(/ZONE-[A-H]/g) || [];
           this.state.zones = [...new Set(zoneMatches)];
+          if (!this.state.zones.length) {
+            // Fallback to model-based zone count
+            this.socket.send('GET ZONE.COUNT\n');
+          } else {
+            this.state.zones.forEach((zone) => {
+              this.socket.send(`GET ${zone}.LINK\n`);
+            });
+          }
+        }
+        if (msg.includes('ZONE.COUNT')) {
+          const count = parseInt(msg.split('"')[1]) || 4; // Default to 4 for 1004
+          this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
           this.state.zones.forEach((zone) => {
             this.socket.send(`GET ${zone}.LINK\n`);
           });
         }
         if (msg.includes('.LINK')) {
-          const [zone, link] = msg.split(' ');
+          const [cmd, zone, link] = msg.split(' ');
           this.state.zoneLinks[zone] = link || null;
         }
         if (msg.includes('SYSTEM.INPUTS')) {
