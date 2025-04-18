@@ -23,4 +23,18 @@ module.exports = (self) => [
       }
     },
   },
+  {
+    type: 'advanced',
+    id: 'system_info',
+    name: 'System Info Display',
+    options: [],
+    callback: (feedback) => {
+      const { apiVersion, state, signalIn, signalOut, lan, wifi } = self.state;
+      return {
+        text: `API: ${apiVersion || 'N/A'}\nState: ${state || 'N/A'}`,
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 50),
+      };
+    },
+  }
 ];
