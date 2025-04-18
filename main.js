@@ -135,67 +135,73 @@ class BlazeAmpInstance extends InstanceBase {
         this.log('debug', `Received: ${msg}`);
         receivedResponses++;
 
-        if (msg.includes('ZONE') && !msg.includes('ZONE.COUNT') && !msg.includes('STEREO')) {
-          this.setVariableValues({ [`zone_status`]: msg });
-        }
-        if (msg.includes('SYSTEM.STATUS.POWER')) {
-          const powerState = msg.includes('ON') ? 'ON' : 'OFF';
-          this.state.power = powerState;
-          this.checkFeedbacks('power_state');
-        }
-        if (msg.includes('SYSTEM.DEVICE.MODEL_NAME')) {
-          const model = msg.split('"')[1] || 'Unknown';
-          this.state.model = model;
-        }
-        if (msg.includes('ZONE.COUNT')) {
-          const count = parseInt(msg.split('"')[1]) || 4;
-          this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
-          const primaryZones = this.state.zones.filter((_, i) => i % 2 === 0);
-          stereoQueriesSent = primaryZones.length;
-          expectedResponses += stereoQueriesSent;
-          primaryZones.forEach((zone) => {
-            this.socket.send(`GET ${zone}.STEREO\n`);
-          });
-        }
-        if (msg.includes('IN.COUNT')) {
-          const count = parseInt(msg.split('"')[1]) || 4;
-          this.state.inputs = Array.from({ length: count }, (_, i) => `IN-${100 + i}`);
-        }
-        if (msg.includes('OUT.COUNT')) {
-          const count = parseInt(msg.split('"')[1]) || 4;
-          this.state.outputs = Array.from({ length: count }, (_, i) => `OUT-${1 + i}`);
-        }
-        if (msg.includes('.STEREO')) {
-          const parts = msg.split(' ');
-          this.log('debug', `Parsing STEREO msg: ${JSON.stringify(parts)}`);
-          if (parts.length >= 3 && parts[1].startsWith('ZONE-')) {
-            const zone = parts[1];
-            const value = parseInt(parts[2]) || 0;
-            this.state.zoneStereo[zone] = value;
-            const zoneIndex = this.state.zones.indexOf(zone);
-            if (zoneIndex >= 0 && zoneIndex % 2 === 0 && zoneIndex + 1 < this.state.zones.length) {
-              const secondaryZone = this.state.zones[zoneIndex + 1];
-              this.state.zoneLinks[secondaryZone] = value === 1 ? zone : null;
-              this.state.zoneStereo[secondaryZone] = 0;
-              this.log('debug', `Set zoneLinks: ${JSON.stringify(this.state.zoneLinks)}`);
-              stereoResponsesReceived++;
+        // Split multi-line responses
+        const lines = msg.split('\n').filter(line => line.trim());
+        lines.forEach((line, index) => {
+          this.log('debug', `Processing line ${index + 1}/${lines.length}: ${line}`);
+
+          if (line.includes('ZONE') && !line.includes('ZONE.COUNT') && !line.includes('STEREO')) {
+            this.setVariableValues({ [`zone_status`]: line });
+          }
+          if (line.includes('SYSTEM.STATUS.POWER')) {
+            const powerState = line.includes('ON') ? 'ON' : 'OFF';
+            this.state.power = powerState;
+            this.checkFeedbacks('power_state');
+          }
+          if (line.includes('SYSTEM.DEVICE.MODEL_NAME')) {
+            const model = line.split('"')[1] || 'Unknown';
+            this.state.model = model;
+          }
+          if (line.includes('ZONE.COUNT')) {
+            const count = parseInt(line.split('"')[1]) || 4;
+            this.state.zones = Array.from({ length: count }, (_, i) => `ZONE-${String.fromCharCode(65 + i)}`);
+            const primaryZones = this.state.zones.filter((_, i) => i % 2 === 0);
+            stereoQueriesSent = primaryZones.length;
+            expectedResponses += stereoQueriesSent;
+            primaryZones.forEach((zone) => {
+              this.socket.send(`GET ${zone}.STEREO\n`);
+            });
+          }
+          if (line.includes('IN.COUNT')) {
+            const count = parseInt(line.split('"')[1]) || 4;
+            this.state.inputs = Array.from({ length: count }, (_, i) => `IN-${100 + i}`);
+          }
+          if (line.includes('OUT.COUNT')) {
+            const count = parseInt(line.split('"')[1]) || 4;
+            this.state.outputs = Array.from({ length: count }, (_, i) => `OUT-${1 + i}`);
+          }
+          if (line.includes('.STEREO')) {
+            const stereoMatch = line.match(/\+(ZONE-[A-Z])\.STEREO ([0-1])/);
+            this.log('debug', `STEREO match: ${JSON.stringify(stereoMatch)}`);
+            if (stereoMatch && stereoMatch[1] && stereoMatch[2] !== undefined) {
+              const zone = stereoMatch[1];
+              const value = parseInt(stereoMatch[2]);
+              this.state.zoneStereo[zone] = value;
+              const zoneIndex = this.state.zones.indexOf(zone);
+              if (zoneIndex >= 0 && zoneIndex % 2 === 0 && zoneIndex + 1 < this.state.zones.length) {
+                const secondaryZone = this.state.zones[zoneIndex + 1];
+                this.state.zoneLinks[secondaryZone] = value === 1 ? zone : null;
+                this.state.zoneStereo[secondaryZone] = 0;
+                this.log('debug', `Set zoneLinks: ${JSON.stringify(this.state.zoneLinks)}`);
+                stereoResponsesReceived++;
+              }
+            } else {
+              this.log('warn', `Invalid STEREO response format: ${line}`);
             }
-          } else {
-            this.log('warn', `Invalid STEREO response format: ${msg}`);
           }
-        }
-        if (msg.includes('SYSTEM.STATUS.SIGNAL_IN')) {
-          const inputs = msg.split('"')[1]?.split(',') || [];
-          if (!this.state.inputs.length) {
-            this.state.inputs = inputs;
+          if (line.includes('SYSTEM.STATUS.SIGNAL_IN')) {
+            const inputs = line.split('"')[1]?.split(',') || [];
+            if (!this.state.inputs.length) {
+              this.state.inputs = inputs;
+            }
           }
-        }
-        if (msg.includes('SYSTEM.STATUS.SIGNAL_OUT')) {
-          const outputs = msg.split('"')[1]?.split(',') || [];
-          if (!this.state.outputs.length) {
-            this.state.outputs = outputs;
+          if (line.includes('SYSTEM.STATUS.SIGNAL_OUT')) {
+            const outputs = line.split('"')[1]?.split(',') || [];
+            if (!this.state.outputs.length) {
+              this.state.outputs = outputs;
+            }
           }
-        }
+        });
 
         // Trigger presets update after all STEREO responses
         if (stereoQueriesSent > 0 && stereoResponsesReceived >= stereoQueriesSent) {

@@ -2,164 +2,61 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = (self) => {
   const presets = [];
-  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C'];
+  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D'];
 
-zones.forEach((zone) => {
-  if (self.state.zoneLinks[zone]) return;
-  
+  zones.forEach((zone) => {
+    if (self.state.zoneLinks[zone]) {
+      self.log('debug', `Skipping Zone ${zone} Ducking (secondary)`);
+      return;
+    }
+
     const zoneLetter = zone.split('-')[1];
+    self.log('debug', `Generating Zone ${zoneLetter} Ducking presets`);
     presets.push({
       type: 'button',
       category: `Zone ${zoneLetter} Ducking`,
-      name: `Enable Zone ${zoneLetter} Ducker Auto`,
-      style: { text: `Duck Auto ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.AUTO 1`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Disable Zone ${zoneLetter} Ducker Auto`,
-      style: { text: `Duck Auto OFF ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.AUTO 0`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Set Zone ${zoneLetter} Ducker Priority`,
-      style: { text: `Duck Priority ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.PRIORITY MIC1`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Set Zone ${zoneLetter} Ducker Threshold`,
-      style: { text: `Duck Thresh ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.THRESHOLD -20`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Set Zone ${zoneLetter} Ducker Depth`,
-      style: { text: `Duck Depth ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.DEPTH -10`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Set Zone ${zoneLetter} Ducker Attack`,
-      style: { text: `Duck Attack ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.ATTACK 0.1`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Set Zone ${zoneLetter} Ducker Release`,
-      style: { text: `Duck Release ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.RELEASE 1.0`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Set Zone ${zoneLetter} Ducker Hold`,
-      style: { text: `Duck Hold ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.HOLD 0.5`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Set Zone ${zoneLetter} Ducker Override Gain`,
-      style: { text: `Duck Override ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.OVERRIDE_GAIN -5`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Enable Zone ${zoneLetter} Ducker Override Gain`,
-      style: { text: `Duck Override En ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
-      steps: [
-        {
-          down: [{ actionId: 'sendCommand', options: { command: `SET ${zone}.DUCK.OVERRIDE_GAIN_ENABLE 1`, value: '' } }],
-          up: []
-        }
-      ],
-      feedbacks: []
-    });
-    presets.push({
-      type: 'button',
-      category: `Zone ${zoneLetter} Ducking`,
-      name: `Get Zone ${zoneLetter} Ducker Settings`,
-      style: { text: `Get Duck ${zoneLetter}`, size: '14', color: combineRgb(255, 255, 255), bgcolor: combineRgb(0, 0, 0) },
+      name: `Enable Zone ${zoneLetter} Ducking`,
+      style: {
+        text: `Enable ${zoneLetter} Duck`,
+        size: '14',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
+      },
       steps: [
         {
           down: [
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.AUTO`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.PRIORITY`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.THRESHOLD`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.DEPTH`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.ATTACK`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.RELEASE`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.HOLD`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.OVERRIDE_GAIN`, value: '' } },
-            { actionId: 'sendCommand', options: { command: `GET ${zone}.DUCK.OVERRIDE_GAIN_ENABLE`, value: '' } },
+            {
+              actionId: 'sendCommand',
+              options: { command: `SET ${zone}.DUCK.ENABLE 1`, value: '' },
+            },
           ],
-          up: []
-        }
+          up: [],
+        },
       ],
-      feedbacks: []
+      feedbacks: [],
+    });
+    presets.push({
+      type: 'button',
+      category: `Zone ${zoneLetter} Ducking`,
+      name: `Disable Zone ${zoneLetter} Ducking`,
+      style: {
+        text: `Disable ${zoneLetter} Duck`,
+        size: '14',
+        color: combineRgb(255, 255, 255),
+        bgcolor: combineRgb(0, 0, 0),
+      },
+      steps: [
+        {
+          down: [
+            {
+              actionId: 'sendCommand',
+              options: { command: `SET ${zone}.DUCK.ENABLE 0`, value: '' },
+            },
+          ],
+          up: [],
+        },
+      ],
+      feedbacks: [],
     });
   });
 
