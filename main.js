@@ -138,6 +138,11 @@ class BlazeAmpInstance extends InstanceBase {
         lines.forEach((line, index) => {
           this.log('debug', `Processing line ${index + 1}/${lines.length}: ${line}`);
 
+          // Skip echoed commands
+          if (line.startsWith('*GET')) {
+            return;
+          }
+
           if (line.includes('ZONE') && !line.includes('ZONE.COUNT') && !line.includes('STEREO')) {
             this.setVariableValues({ [`zone_status`]: line });
           }

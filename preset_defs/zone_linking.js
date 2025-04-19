@@ -2,12 +2,11 @@ const { combineRgb } = require('@companion-module/base');
 
 module.exports = (self) => {
   const presets = [];
-  // Only primary zones (A, C for ZONE.COUNT 4; A, C, E, G for max 8)
-  const primaryZones = (self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D'])
-    .filter((_, index) => index % 2 === 0); // A (0), C (2)
+  // All zones, but skip secondary ones
+  const zones = self.state.zones || ['ZONE-A', 'ZONE-B', 'ZONE-C', 'ZONE-D'];
 
-  primaryZones.forEach((zone) => {
-    // Skip secondary zones
+  zones.forEach((zone) => {
+    // Skip secondary zones (e.g., B if linked to A)
     if (self.state.zoneLinks[zone]) {
       self.log('debug', `Skipping Zone ${zone} Linking (secondary)`);
       return;
