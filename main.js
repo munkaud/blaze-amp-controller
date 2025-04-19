@@ -5,6 +5,7 @@ const debug = require('./preset_defs/debug');
 const digitals = require('./preset_defs/digitals');
 const inputs = require('./preset_defs/inputs');
 const inputs_dante = require('./preset_defs/inputs_dante');
+const inputs_generator = require('./preset_defs/inputs_generator');
 const registers = require('./preset_defs/registers');
 const zone_settings = require('./preset_defs/zone_settings');
 const zone_duck = require('./preset_defs/zone_duck');
@@ -12,7 +13,6 @@ const zone_compress = require('./preset_defs/zone_compress');
 const subscriptions = require('./preset_defs/subscriptions');
 const controls = require('./preset_defs/controls');
 const zone_linking = require('./preset_defs/zone_linking');
-const dante = require('./preset_defs/dante');
 
 class BlazeAmpInstance extends InstanceBase {
   constructor(internal) {
@@ -84,6 +84,7 @@ class BlazeAmpInstance extends InstanceBase {
       ...digitals(this),
       ...inputs(this),
       ...inputs_dante(this),
+      ...inputs_generator(this),
       ...registers(this),
       ...zone_settings(this),
       ...zone_duck(this),
@@ -91,7 +92,6 @@ class BlazeAmpInstance extends InstanceBase {
       ...subscriptions(this),
       ...controls(this),
       ...zone_linking(this),
-      ...dante(this),
     ];
     this.log('debug', `Updating presets with zones: ${JSON.stringify(this.state.zones)}, zoneLinks: ${JSON.stringify(this.state.zoneLinks)}`);
     this.setPresetDefinitions(presets);

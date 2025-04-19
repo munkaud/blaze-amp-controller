@@ -1,18 +1,18 @@
 const { InstanceBase, runEntrypoint, TCPHelper } = require('@companion-module/base');
-const actions = require('./actions');
-const feedbacks = require('./feedbacks');
-const debug = require('./preset_defs/debug');
-const digitals = require('./preset_defs/digitals');
-const inputs = require('./preset_defs/inputs');
-const inputs_dante = require('./preset_defs/inputs_dante');
-const registers = require('./preset_defs/registers');
-const zone_settings = require('./preset_defs/zone_settings');
-const zone_duck = require('./preset_defs/zone_duck');
-const zone_compress = require('./preset_defs/zone_compress');
-const subscriptions = require('./preset_defs/subscriptions');
-const controls = require('./preset_defs/controls');
-const zone_linking = require('./preset_defs/zone_linking');
-const dante = require('./preset_defs/dante');
+const actions = require('../actions');
+const feedbacks = require('../feedbacks');
+const debug = require('./debug');
+const digitals = require('./digitals');
+const inputs = require('./inputs');
+const inputs_dante = require('./inputs_dante');
+const registers = require('./registers');
+const zone_settings = require('./zone_settings');
+const zone_duck = require('./zone_duck');
+const zone_compress = require('./zone_compress');
+const subscriptions = require('./subscriptions');
+const controls = require('./controls');
+const zone_linking = require('./zone_linking');
+const dante = require('./dante');
 
 class BlazeAmpInstance extends InstanceBase {
   constructor(internal) {

@@ -1,4 +1,5 @@
 const { combineRgb } = require('@companion-module/base');
+const actions = require('../actions');
 
 module.exports = (self) => {
   const presets = [];
