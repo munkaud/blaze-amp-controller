@@ -4,7 +4,6 @@ const feedbacks = require('./feedbacks');
 const debug = require('./preset_defs/debug');
 const digitals = require('./preset_defs/digitals');
 const inputs = require('./preset_defs/inputs');
-//const inputs_dante = require('./preset_defs/inputs_dante');
 const inputs_generator = require('./preset_defs/inputs_generator');
 const registers = require('./preset_defs/registers');
 const zone_settings = require('./preset_defs/zone_settings');
@@ -83,7 +82,6 @@ class BlazeAmpInstance extends InstanceBase {
       ...debug(this),
       ...digitals(this),
       ...inputs(this),
-      //...inputs_dante(this),
       ...inputs_generator(this),
       ...registers(this),
       ...zone_settings(this),
